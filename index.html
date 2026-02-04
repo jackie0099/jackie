@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FleetFlow Pro v5.8 - Full System</title>
+    <title>FleetFlow Pro v5.8 - Fixed System</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -11,38 +11,25 @@
             --card: #ffffff; --text-dark: #1e293b; --text-light: #f8fafc;
             --whatsapp: #25D366;
         }
-
         body { font-family: 'Noto Sans Lao', sans-serif; background: var(--bg); color: var(--text-light); margin: 0; padding: 20px; padding-bottom: 120px; }
         .container { max-width: 1100px; margin: auto; }
         .panel { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); margin-bottom: 20px; color: var(--text-dark); }
-        
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
         textarea, input { width: 100%; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
-        
         .admin-box { background: #1e293b; padding: 15px; border-radius: 15px; border: 2px dashed var(--primary); margin-bottom: 20px; display: none; color: white; }
-        
         .btn { border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: inherit; }
         .btn-main { background: var(--primary); color: white; width: 100%; }
         .btn-sync { background: #0ea5e9; color: white; margin-bottom: 15px; width: 100%; }
         .btn-tool { padding: 6px 12px; font-size: 12px; margin-top: 5px; }
-
         .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
         .car-card { background: var(--card); color: var(--text-dark); padding: 15px; border-radius: 15px; border-left: 6px solid #94a3b8; cursor: pointer; position: relative; transition: 0.3s; }
         .car-card.selected { border-left-color: var(--primary); transform: scale(1.02); box-shadow: 0 5px 15px rgba(220, 38, 38, 0.3); background-color: #fff1f2; }
-        
         .plate { font-size: 1.3rem; font-weight: 700; color: #000; display: block; }
         .status-badge { font-size: 10px; float: right; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
         .status-free { background: #dcfce7; color: #166534; }
         .status-busy { color: #991b1b; background: #fee2e2; }
-
         .edit-form { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; }
-
-        #waBtn { 
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
-            width: 90%; max-width: 500px; background: var(--whatsapp); color: white; 
-            font-size: 18px; box-shadow: 0 5px 25px rgba(0,0,0,0.5); z-index: 1000;
-        }
-        
+        #waBtn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: var(--whatsapp); color: white; font-size: 18px; box-shadow: 0 5px 25px rgba(0,0,0,0.5); z-index: 1000; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
     </style>
 </head>
@@ -71,7 +58,6 @@
     <div class="panel">
         <textarea id="rawText" rows="3" placeholder="📋 ວາງຂໍ້ຄວາມທົວ WhatsApp ບ່ອນນີ້..."></textarea>
         <button class="btn btn-main" style="background:#1e293b; margin-bottom:15px;" onclick="processText()">🎲 ສຸ່ມຈັບຄູ່ລົດ</button>
-        
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
             <input type="text" id="tourID" placeholder="ລະຫັດທົວ">
             <input type="number" id="carQty" placeholder="ຈຳນວນລົດ">
@@ -82,17 +68,27 @@
     </div>
 
     <div id="fleetDisplay" class="fleet-grid"></div>
-    
     <button id="waBtn" class="btn" onclick="submitWork()">🚀 ບັນທຶກ & ສົ່ງ WhatsApp</button>
 </div>
 
 <script>
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbxjLwcmVBOGc2_VPYkiKrdKCQhTu9AbVc1vvWmH7b_MR-159N0s6YXS5ifMcDDL587W/exec";
     
-    let cars = JSON.parse(localStorage.getItem('fleet_v58')) || [];
+    // --- ຍ້າຍລາຍຊື່ລົດມາໄວ້ບ່ອນນີ້ໃຫ້ຖືກຕ້ອງ ---
+    let cars = JSON.parse(localStorage.getItem('fleet_v58')) || [
+        {id:1, plate:'ບກ 3301', driver:'ຄົນຂັບ 1', phone:'020 5512301', status:'available'},
+        {id:2, plate:'ບກ 3302', driver:'ຄົນຂັບ 2', phone:'020 5512302', status:'available'},
+        {id:3, plate:'ບກ 3303', driver:'ຄົນຂັບ 3', phone:'020 5512303', status:'available'},
+        {id:4, plate:'ບກ 3304', driver:'ຄົນຂັບ 4', phone:'020 5512304', status:'available'},
+        {id:5, plate:'ບກ 3305', driver:'ຄົນຂັບ 5', phone:'020 5512305', status:'available'},
+        {id:6, plate:'ບກ 3306', driver:'ຄົນຂັບ 6', phone:'020 5512306', status:'available'},
+        {id:7, plate:'ບກ 3307', driver:'ຄົນຂັບ 7', phone:'020 5512307', status:'available'},
+        {id:8, plate:'ບກ 3308', driver:'ຄົນຂັບ 8', phone:'020 5512308', status:'available'},
+        {id:9, plate:'ບກ 3309', driver:'ຄົນຂັບ 9', phone:'020 5512309', status:'available'},
+        {id:10, plate:'ບກ 3310', driver:'ຄົນຂັບ 10', phone:'020 5512310', status:'available'}
+    ];
     let pendingIds = [];
 
-    // --- ລະບົບ Cloud Sync ---
     async function syncFromCloud() {
         document.getElementById('loader').style.display = 'flex';
         try {
@@ -111,63 +107,18 @@
                 }
             });
             render();
-        } catch (e) { alert("Sync ບໍ່ສຳເລັດ: " + e.message); }
+        } catch (e) { console.log(e); }
         document.getElementById('loader').style.display = 'none';
     }
 
-    // --- ລະບົບຈັດການຂໍ້ມູນ ---
-    function toggleAdmin() {
-        const p = document.getElementById('adminPanel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function addNewCar() {
-        const p = document.getElementById('addPlate').value;
-        const d = document.getElementById('addDriver').value;
-        const ph = document.getElementById('addPhone').value;
-        if(!p || !d) return alert("ກອກຂໍ້ມູນໃຫ້ຄົບ");
-        cars.push({ id: Date.now(), plate: p, driver: d, phone: ph, status: 'available' });
-        saveAndRefresh();
-        document.getElementById('addPlate').value = ''; document.getElementById('addDriver').value = '';
-    }
-
-    function deleteCar(id) {
-        if(confirm("ລຶບລົດຄັນນີ້?")) {
-            cars = cars.filter(c => c.id !== id);
-            saveAndRefresh();
-        }
-    }
-
-    function toggleEditForm(id) {
-        const f = document.getElementById(`edit-form-${id}`);
-        f.style.display = f.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function saveEdit(id) {
-        const car = cars.find(c => c.id === id);
-        car.driver = document.getElementById(`ed-${id}`).value;
-        car.phone = document.getElementById(`ep-${id}`).value;
-        saveAndRefresh();
-    }
-
-    function saveAndRefresh() {
-        localStorage.setItem('fleet_v58', JSON.stringify(cars));
-        render();
-    }
-
-    // --- ລະບົບຫຼັກ ---
     function render() {
         const display = document.getElementById('fleetDisplay');
         display.innerHTML = '';
-        
-        // ປຸ່ມ WhatsApp ສະແດງຕະຫຼອດ
         document.getElementById('waBtn').style.display = 'block';
-
         cars.forEach(car => {
             const isSel = pendingIds.includes(car.id);
             const isB = car.status === 'busy';
             const cardStyle = isB ? `style="background-color:${car.groupColor || '#fee2e2'}; border-left-color:red;"` : '';
-
             display.innerHTML += `
                 <div class="car-card ${isSel ? 'selected' : ''}" ${cardStyle} onclick="toggleSelect(${car.id})">
                     <span class="status-badge ${isB ? 'status-busy' : 'status-free'}">
@@ -176,12 +127,10 @@
                     <span class="plate">${car.plate}</span>
                     <div style="font-weight:bold;">👤 ${car.driver}</div>
                     <div style="font-size:13px; color:#475569;">📞 ${car.phone}</div>
-                    
                     <div style="margin-top:8px;">
                         <button class="btn btn-tool" style="background:#f1f5f9;" onclick="event.stopPropagation(); toggleEditForm(${car.id})">✏️</button>
                         <button class="btn btn-tool" style="background:#fee2e2; color:red;" onclick="event.stopPropagation(); deleteCar(${car.id})">🗑️</button>
                     </div>
-
                     <div id="edit-form-${car.id}" class="edit-form" onclick="event.stopPropagation();">
                         <input type="text" id="ed-${car.id}" value="${car.driver}">
                         <input type="text" id="ep-${car.id}" value="${car.phone}">
@@ -199,6 +148,25 @@
         else pendingIds.push(id);
         render();
     }
+
+    function toggleAdmin() { const p = document.getElementById('adminPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
+    function addNewCar() {
+        const p = document.getElementById('addPlate').value;
+        const d = document.getElementById('addDriver').value;
+        const ph = document.getElementById('addPhone').value;
+        if(!p || !d) return alert("ກອກຂໍ້ມູນໃຫ້ຄົບ");
+        cars.push({ id: Date.now(), plate: p, driver: d, phone: ph, status: 'available' });
+        saveAndRefresh();
+    }
+    function deleteCar(id) { if(confirm("ລຶບລົດຄັນນີ້?")) { cars = cars.filter(c => c.id !== id); saveAndRefresh(); } }
+    function toggleEditForm(id) { const f = document.getElementById(`edit-form-${id}`); f.style.display = f.style.display === 'block' ? 'none' : 'block'; }
+    function saveEdit(id) {
+        const car = cars.find(c => c.id === id);
+        car.driver = document.getElementById(`ed-${id}`).value;
+        car.phone = document.getElementById(`ep-${id}`).value;
+        saveAndRefresh();
+    }
+    function saveAndRefresh() { localStorage.setItem('fleet_v58', JSON.stringify(cars)); render(); }
 
     function processText() {
         const text = document.getElementById('rawText').value;
@@ -219,35 +187,18 @@
     async function submitWork() {
         const tid = document.getElementById('tourID').value;
         const detail = document.getElementById('tourDetail').value;
-        const start = document.getElementById('startTime').value;
-        const end = document.getElementById('endTime').value;
-
         if (!tid || pendingIds.length === 0) return alert("ກະລຸນາໃສ່ລະຫັດທົວ ແລະ ເລືອກລົດກ່ອນ!");
-
         document.getElementById('loader').style.display = 'flex';
         const selected = pendingIds.map(id => cars.find(c => c.id === id));
-        
-        const payload = {
-            tourName: tid,
-            tourDetail: detail,
-            startTime: start ? new Date(start).toLocaleString('lo-LA') : '',
-            endTime: end ? new Date(end).toLocaleString('lo-LA') : '',
-            selectedCars: selected
-        };
-
         try {
-            await fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            
-            const msg = `🚛 *ແຈ້ງຈັດລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${detail || '-'}\n📥 *ຮັບ:* ${payload.startTime}\n📤 *ສົ່ງ:* ${payload.endTime}\n----------\n` + 
-                        selected.map((c, i) => `${i+1}. ✅ ${c.plate} (${c.driver})`).join('\n');
-            
+            await fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tourName: tid, tourDetail: detail, selectedCars: selected }) });
+            const msg = `🚛 *ແຈ້ງຈັດລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${detail || '-'}\n----------\n` + selected.map((c, i) => `${i+1}. ✅ ${c.plate} (${c.driver})`).join('\n');
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
             pendingIds = [];
             syncFromCloud();
         } catch (e) { alert("Error!"); }
         document.getElementById('loader').style.display = 'none';
     }
-
     window.onload = syncFromCloud;
 </script>
 </body>
