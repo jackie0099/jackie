@@ -150,34 +150,54 @@
         document.getElementById('loader').style.display = 'none';
     }
 
-    // --- ສ່ວນ UI ເດີມ ---
-    function render() {
-        const display = document.getElementById('fleetDisplay');
-        display.innerHTML = '';
-        cars.forEach(car => {
-            const isSel = pendingIds.includes(car.id);
-            const isB = car.status === 'busy';
-            const cardStyle = isB ? `style="background-color:${car.groupColor}; border-left-color:red;"` : (isSel ? `style="background-color:#fff1f2; border-left-color:var(--primary);"` : '');
+   function render() {
+    const display = document.getElementById('fleetDisplay');
+    display.innerHTML = '';
+    
+    // ເຊັກວ່າຖ້າມີການເລືອກລົດ (pendingIds) ໃຫ້ສະແດງປຸ່ມ WhatsApp
+    const waBtn = document.getElementById('waBtn');
+    if (waBtn) {
+        if (pendingIds.length > 0) {
+            waBtn.style.display = 'block'; // ສະແດງປຸ່ມເມື່ອມີລົດຖືກເລືອກ
+        } else {
+            waBtn.style.display = 'none';  // ຊ້ອນປຸ່ມຖ້າບໍ່ມີລົດຖືກເລືອກ
+        }
+    }
 
-            display.innerHTML += `
-                <div class="car-card ${isSel ? 'selected' : ''}" ${cardStyle}>
-                    <span class="status-badge ${isB ? 'status-busy' : 'status-free'}">
-                        ${isB ? '🔴 ' + car.currentTour : '🟢 ວ່າງ'}
-                    </span>
-                    <span class="plate">${car.plate}</span>
-                    <div style="font-weight:bold;">👤 ${car.driver}</div>
-                    <div style="font-size:13px; color:#475569;">📞 ${car.phone}</div>
-                    <div style="margin-top:10px;">
-                        <button class="btn" style="padding:4px 8px; font-size:11px; background:#f1f5f9;" onclick="toggleEdit(${car.id})">✏️ ແກ້ໄຂ</button>
-                        <button class="btn" style="padding:4px 8px; font-size:11px; background:#fee2e2; color:red;" onclick="deleteCar(${car.id})">🗑️</button>
-                    </div>
-                    <div id="edit-${car.id}" style="display:none; margin-top:10px;">
-                        <input type="text" id="d-${car.id}" value="${car.driver}">
-                        <input type="text" id="ph-${car.id}" value="${car.phone}">
-                        <button class="btn btn-main" style="padding:5px;" onclick="saveEdit(${car.id})">Save</button>
-                    </div>
-                </div>`;
-        });
+    cars.forEach(car => {
+        const isSel = pendingIds.includes(car.id);
+        const isB = car.status === 'busy';
+        const cardStyle = isB ? `style="background-color:${car.groupColor}; border-left-color:red;"` : (isSel ? `style="background-color:#fff1f2; border-left-color:var(--primary);"` : '');
+
+        display.innerHTML += `
+            <div class="car-card ${isSel ? 'selected' : ''}" ${cardStyle} onclick="toggleSelect(${car.id})">
+                <span class="status-badge ${isB ? 'status-busy' : 'status-free'}">
+                    ${isB ? '🔴 ' + car.currentTour : '🟢 ວ່າງ'}
+                </span>
+                <span class="plate">${car.plate}</span>
+                <div style="font-weight:bold;">👤 ${car.driver}</div>
+                <div style="font-size:13px; color:#475569;">📞 ${car.phone}</div>
+                <div style="margin-top:10px;">
+                    <button class="btn" style="padding:4px 8px; font-size:11px; background:#f1f5f9;" onclick="event.stopPropagation(); toggleEdit(${car.id})">✏️ ແກ້ໄຂ</button>
+                </div>
+            </div>`;
+    });
+}
+
+// ວາງຟັງຊັນນີ້ຕໍ່ທ້າຍ render ເພື່ອໃຫ້ກົດເລືອກລົດໄດ້
+function toggleSelect(id) {
+    const car = cars.find(c => c.id === id);
+    if (car && car.status === 'busy') return; 
+
+    const index = pendingIds.indexOf(id);
+    if (index > -1) {
+        pendingIds.splice(index, 1); 
+    } else {
+        pendingIds.push(id); 
+    }
+    render(); 
+}-
+  
     }
 
     function processText() {
