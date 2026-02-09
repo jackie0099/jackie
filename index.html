@@ -6,25 +6,80 @@
     <title>Fleet Master v22.0 - Stable Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #e11d48; --primary-hover: #be123c; --bg: #0f172a; --card: #ffffff; --whatsapp: #25D366; --accent: #38bdf8; }
-        body { font-family: 'Noto Sans Lao', sans-serif; background: var(--bg); background-image: radial-gradient(circle at top right, #1e293b, #0f172a); color: #fff; margin: 0; padding: 15px; padding-bottom: 150px; min-height: 100vh; }
+        :root { 
+            --primary: #e11d48; 
+            --primary-hover: #be123c;
+            --bg: #0f172a; 
+            --card: #ffffff; 
+            --whatsapp: #25D366;
+            --accent: #38bdf8;
+        }
+        
+        body { 
+            font-family: 'Noto Sans Lao', sans-serif; 
+            background: var(--bg); 
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: #fff; 
+            margin: 0; 
+            padding: 15px; 
+            padding-bottom: 150px; 
+            min-height: 100vh;
+        }
+
         .container { max-width: 1000px; margin: auto; }
-        header { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .panel { background: var(--card); color: #1e293b; padding: 25px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        textarea, input { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; box-sizing: border-box; font-family: inherit; font-size: 15px; transition: 0.3s; }
+
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel { 
+            background: var(--card); 
+            color: #1e293b; 
+            padding: 25px; 
+            border-radius: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
+        }
+
+        textarea, input { 
+            width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; 
+            margin-bottom: 12px; box-sizing: border-box; font-family: inherit; font-size: 15px;
+            transition: 0.3s;
+        }
+
         textarea:focus, input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1); }
         label { font-size: 12px; color: #64748b; font-weight: 700; margin-bottom: 6px; display: block; text-transform: uppercase; }
+        
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .car-card { background: #fff; color: #1e293b; padding: 20px; border-radius: 20px; border-left: 10px solid #cbd5e1; transition: all 0.4s; cursor: pointer; position: relative; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        
+        .car-card { 
+            background: #fff; color: #1e293b; padding: 20px; border-radius: 20px; 
+            border-left: 10px solid #cbd5e1; transition: all 0.4s; 
+            cursor: pointer; position: relative; box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
         .car-card.selected { background: #f0f9ff; border-left-color: var(--accent); transform: translateY(-5px); box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
         .car-card.busy { opacity: 0.8; cursor: not-allowed; background: #f8fafc; border-left-color: #94a3b8; }
+        
         .plate { font-size: 1.8rem; font-weight: 900; display: block; color: #0f172a; line-height: 1; }
+        .driver-info { color: #334155; font-weight: 700; font-size: 16px; margin-top: 10px; }
+        
         .tour-badge { font-size: 10px; font-weight: 800; float: right; padding: 5px 12px; border-radius: 20px; color: white; text-transform: uppercase; }
         .queue-info { font-size: 11px; color: #94a3b8; margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 8px; }
+
         .btn { border: none; padding: 16px; border-radius: 14px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; font-size: 16px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-main { background: var(--primary); color: #fff; }
         .btn-paste { background: var(--accent); color: white; margin-bottom: 15px; }
         .btn-action { padding: 8px 14px; font-size: 11px; border-radius: 8px; border: 1.5px solid #e2e8f0; background: white; color: #475569; cursor: pointer; font-weight: 700; margin-top: 10px; }
+
         #waBtn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: var(--whatsapp); color: white; z-index: 1000; box-shadow: 0 20px 50px rgba(37, 211, 102, 0.4); font-size: 18px; }
     </style>
 </head>
@@ -37,7 +92,7 @@
     </header>
 
     <div id="admin" style="display:none;" class="panel">
-        <h4 style="margin-top:0;">➕ ເພີ່ມ/ແກ້ໄຂຄົນຂັບ</h4>
+        <h4 style="margin-top:0;">➕ ເພີ່ມ/ແກ້ໄຂຂໍ້ມູນລົດ</h4>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
             <input type="text" id="newP" placeholder="ທະບຽນລົດ">
             <input type="text" id="newD" placeholder="ຊື່ຄົນຂັບ">
@@ -61,7 +116,7 @@
         </div>
         <label>📍 ລາຍລະອຽດ (ຈຳນວນຄົນ):</label>
         <textarea id="tourDetail" rows="2" placeholder="ຕົວຢ່າງ: 15 ຄົນ, ຫຼວງພະບາງ..."></textarea>
-        <button class="btn" style="background:#1e293b; color:white;" onclick="autoMatch()">⚖️ ເລືອກລົດຕາມຄິວ (FIFO)</button>
+        <button class="btn" style="background:#1e293b; color:white;" onclick="autoMatch()">⚖️ ເລືອກລົດຕາມຄິວ (FIFO Queue)</button>
     </div>
 
     <div id="fleet" class="grid"></div>
@@ -69,6 +124,7 @@
 </div>
 
 <script>
+    // --- ໃຊ້ API URL ທີ່ທ່ານ Deploy ຫຼ້າສຸດ ---
     const API_URL = "https://script.google.com/macros/s/AKfycbwTMfD4es7Wgs6olfXBCdb7Yx8qBB4C2i4SbVUiR7SMg1uGsIUEebh8iSP1oGUJwWm1/exec";
 
     let fleet = JSON.parse(localStorage.getItem('fleet_v21')) || [
@@ -83,23 +139,21 @@
     let selectedPlates = [];
     const VIVID_COLORS = ["#2563eb", "#d97706", "#7c3aed", "#db2777", "#059669", "#dc2626", "#4f46e5", "#ea580c"];
 
-    // ຟັງຊັນຊ່ວຍປ່ຽນຮູບແບບວັນທີໃຫ້ເປັນ ວັນ/ເດືອນ/ປີ
-    function formatToLaoDate(isoString) {
-        if (!isoString) return "-";
-        const date = new Date(isoString);
-        const d = date.getDate().toString().padStart(2, '0');
-        const m = (date.getMonth() + 1).toString().padStart(2, '0');
-        const y = date.getFullYear();
-        const time = date.toLocaleTimeString('lo-LA', { hour: '2-digit', minute: '2-digit' });
-        return `${d}/${m}/${y} ${time}`;
-    }
-
     async function syncData() {
         try {
             const res = await fetch(API_URL);
-            cloudData = await res.json();
+            const data = await res.json();
+            // ຖ້າ Apps Script ແຈ້ງ error ບອກວ່າຫາ Sheet ບໍ່ເຫັນ
+            if (data.error) {
+                alert("⚠️ " + data.message);
+                return;
+            }
+            cloudData = data;
             render();
-        } catch (e) { render(); }
+        } catch (e) { 
+            console.log("Sync Error:", e);
+            render(); 
+        }
     }
 
     function render() {
@@ -111,6 +165,7 @@
             const busy = cloudData.find(c => c.plate === car.plate && c.status !== "Done");
             const isSelected = selectedPlates.includes(car.plate);
             
+            // FIFO Logic: ຊອກຫາເວລາພັກລ່າສຸດຈາກ Timestamp ໃນຖັນ A
             const history = cloudData.filter(d => d.plate === car.plate);
             const lastWork = history.length > 0 ? new Date(Math.max(...history.map(h => new Date(h.timestamp)))) : null;
             
@@ -122,12 +177,13 @@
             card.innerHTML = `
                 <div class="tour-badge" style="background:${tourColor}">${busy ? busy.tourName : (isSelected ? 'ເລືອກແລ້ວ' : 'ຫວ່າງ')}</div>
                 <span class="plate">${car.plate}</span>
-                <div style="font-weight:bold; margin-top:10px;">👤 ${car.driver}</div>
+                <div class="driver-info">👤 ${car.driver}</div>
                 <div style="font-size:13px;color:#64748b;">📞 ${car.phone}</div>
                 ${busy ? `<div style="font-size:11px; color:${tourColor}; margin-top:10px; font-weight:bold;">📍 ${busy.tourLoc}</div>` : 
-                `<div class="queue-info">💤 ພັກຕັ້ງແຕ່: ${lastWork ? formatToLaoDate(lastWork) : 'ບໍ່ມີປະຫວັດ'}</div>`}
+                `<div class="queue-info">💤 ພັກຕັ້ງແຕ່: ${lastWork ? lastWork.toLocaleString('lo-LA') : 'ບໍ່ມີປະຫວັດ'}</div>`}
                 <div style="display:flex; gap:5px;">
                     <button class="btn-action" onclick="event.stopPropagation(); editDriver('${car.plate}')">✏️ ແກ້ໄຂ</button>
+                    <button class="btn-action" style="color:red" onclick="event.stopPropagation(); deleteCar('${car.plate}')">🗑️ ລຶບ</button>
                     ${busy ? `<button class="btn-action" style="color:#e11d48;" onclick="event.stopPropagation(); forceReset('${car.plate}')">🔄 Reset</button>` : ''}
                 </div>
             `;
@@ -151,6 +207,7 @@
         const pM = text.match(/(\d+)\s*ຄົນ/i) || text.match(/(?:ຈຳນວນຄົນ|ຄົນ)\s*(\d+)/i);
         if(pM) document.getElementById('tourDetail').value = pM[0];
 
+        // --- ດຶງວັນທີ ແລະ ເວລາອັດຕະໂນມັດ ---
         const lines = text.split('\n');
         let dates = [];
         lines.forEach(l => {
@@ -161,39 +218,14 @@
 
         if(dates.length >= 1) {
             const f = dates[0], l = dates[dates.length-1];
-            // ໝາຍເຫດ: Input datetime-local ຍັງຕ້ອງໃຊ້ YYYY-MM-DD ເພື່ອໃຫ້ Browser ສະແດງຜົນຖືກ
             document.getElementById('startTime').value = `${year}-${f.m}-${f.d}T${f.t || "08:00"}`;
             document.getElementById('endTime').value = `${year}-${l.m}-${l.d}T${l.t || (dates.length==1?"17:00":"08:00")}`;
         }
         render();
     }
 
-    async function saveAndSend() {
-        const tid = document.getElementById('tourID').value, det = document.getElementById('tourDetail').value;
-        const s = document.getElementById('startTime').value, e = document.getElementById('endTime').value;
-        if(!tid || !selectedPlates.length) return alert("ກະລຸນາເລືອກລົດ ແລະ ໃສ່ລະຫັດທົວ!");
-        
-        const sel = selectedPlates.map(p => fleet.find(f => f.plate === p));
-        
-        // ສົ່ງຂໍ້ມູນລົງ Google Sheets (ຮັກສາ YYYY-MM-DD ສຳລັບ Database)
-        fetch(API_URL, { 
-            method: 'POST', mode: 'no-cors', 
-            body: JSON.stringify({ tourName: tid, tourLoc: det, startTime: s, endTime: e, selectedCars: sel }) 
-        });
-
-        // ສົ່ງ WhatsApp (ປ່ຽນເປັນ DD/MM/YYYY ສຳລັບຄົນອ່ານ)
-        const msg = `🚛 *ແຈ້ງຈັດລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${det}\n📅 *ຮັບ:* ${formatToLaoDate(s)}\n🏁 *ສົ່ງ:* ${formatToLaoDate(e)}\n----------\n` + 
-                    sel.map((c, i) => `${i+1}. ✅ *${c.plate}* (${c.driver})`).join('\n');
-        
-        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-        setTimeout(syncData, 5000);
-    }
-
-    async function forceReset(p) {
-        if(confirm(`Reset ລົດ ${p} ໃຫ້ຫວ່າງ?`)) { 
-            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'RESET_SINGLE', plate: p }) }); 
-            setTimeout(syncData, 1500); 
-        }
+    async function pasteFromClipboard() {
+        try { const t = await navigator.clipboard.readText(); document.getElementById('rawText').value = t; parseWhatsApp(); } catch(e) { alert("ກະລຸນາວາງຂໍ້ຄວາມລົງໂດຍກົງ"); }
     }
 
     function toggleSelect(p) {
@@ -204,8 +236,13 @@
 
     function autoMatch() {
         const q = parseInt(document.getElementById('qty').value) || 0;
+        if (q <= 0) return alert("ກະລຸນາໃສ່ຈຳນວນລົດ!");
+
+        // ຫາລົດທີ່ຫວ່າງ (ບໍ່ມີສະຖານະ Active)
         const busyP = new Set(cloudData.filter(d => d.status !== "Done").map(d => d.plate));
         let free = fleet.filter(c => !busyP.has(c.plate));
+
+        // ຈັດລຽງຕາມ FIFO: ໃຜພັກດົນສຸດ (Timestamp ເກົ່າສຸດ) ໄດ້ວຽກກ່ອນ
         free.sort((a,b) => {
             const hA = cloudData.filter(d => d.plate === a.plate);
             const hB = cloudData.filter(d => d.plate === b.plate);
@@ -213,28 +250,101 @@
             const tB = hB.length ? new Date(Math.max(...hB.map(x => new Date(x.timestamp)))) : new Date(0);
             return tA - tB;
         });
+
         selectedPlates = free.slice(0, q).map(c => c.plate);
         render();
+        alert(`✅ ເລືອກລົດໃຫ້ ${selectedPlates.length} ຄັນ ຕາມລຳດັບຄິວພັກຜ່ອນ.`);
     }
 
-    function toggleAdmin() { const el = document.getElementById('admin'); el.style.display = el.style.display==='none'?'block':'none'; }
-    function addCar() {
-        const p = document.getElementById('newP').value, d = document.getElementById('newD').value, ph = document.getElementById('newPh').value;
-        if(p && d && ph) { fleet.push({plate:p, driver:d, phone:ph}); localStorage.setItem('fleet_v21', JSON.stringify(fleet)); render(); toggleAdmin(); }
+    async function saveAndSend() {
+        const tid = document.getElementById('tourID').value;
+        const det = document.getElementById('tourDetail').value;
+        const s = document.getElementById('startTime').value;
+        const e = document.getElementById('endTime').value;
+        
+        if(!tid || !selectedPlates.length) return alert("ກະລຸນາເລືອກລົດ ແລະ ໃສ່ລະຫັດທົວ!");
+        
+        const sel = selectedPlates.map(p => fleet.find(f => f.plate === p));
+        
+        // Optimistic UI Update (ສະແດງຜົນທັນທີ)
+        selectedPlates.forEach(p => {
+            cloudData.push({ plate: p, tourName: tid, tourLoc: det, status: "Active", timestamp: new Date().toISOString() });
+        });
+        selectedPlates = []; 
+        render();
+
+        // ສົ່ງຂໍ້ມູນລົງ Google Sheets (ຖັນ A ຫາ I)
+        fetch(API_URL, { 
+            method: 'POST', mode: 'no-cors', 
+            body: JSON.stringify({ 
+                tourName: tid, 
+                tourLoc: det, 
+                startTime: s, 
+                endTime: e, 
+                selectedCars: sel 
+            }) 
+        });
+
+        // ສົ່ງແຈ້ງການທາງ WhatsApp
+        const msg = `🚛 *ແຈ້ງຈັດລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${det}\n📅 *ຮັບ:* ${s.replace('T',' ')}\n🏁 *ສົ່ງ:* ${e.replace('T',' ')}\n----------\n` + 
+                    sel.map((c, i) => `${i+1}. ✅ *${c.plate}* (${c.driver})`).join('\n');
+        
+        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        setTimeout(syncData, 5000); // Sync ຂໍ້ມູນຄືນໃນ 5 ວິນາທີ
     }
-    
+
     function editDriver(p) {
         const i = fleet.findIndex(f => f.plate === p);
-        const nP = prompt('ທະບຽນໃໝ່:', fleet[i].plate), nD = prompt('ຊື່ຄົນຂັບໃໝ່:', fleet[i].driver), nPh = prompt('ເບີໂທໃໝ່:', fleet[i].phone);
-        if(nP && nD && nPh) { fleet[i] = {plate:nP, driver:nD, phone:nPh}; localStorage.setItem('fleet_v21', JSON.stringify(fleet)); render(); }
+        const nP = prompt('ທະບຽນໃໝ່:', fleet[i].plate);
+        const nD = prompt('ຊື່ຄົນຂັບໃໝ່:', fleet[i].driver);
+        const nPh = prompt('ເບີໂທໃໝ່:', fleet[i].phone);
+        if(nP && nD && nPh) { 
+            fleet[i] = { plate: nP, driver: nD, phone: nPh }; 
+            localStorage.setItem('fleet_v21', JSON.stringify(fleet)); 
+            render(); 
+        }
     }
 
-    async function pasteFromClipboard() {
-        try { const t = await navigator.clipboard.readText(); document.getElementById('rawText').value = t; parseWhatsApp(); } catch(e) {}
+    function deleteCar(p) {
+        if(confirm(`ຢືນຢັນການລົບລົດ ${p} ອອກຈາກລາຍຊື່?`)) { 
+            fleet = fleet.filter(f => f.plate !== p); 
+            localStorage.setItem('fleet_v21', JSON.stringify(fleet)); 
+            render(); 
+        }
+    }
+
+    async function forceReset(p) {
+        if(confirm(`Reset ລົດ ${p} ໃຫ້ຫວ່າງ (Done)?`)) { 
+            await fetch(API_URL, { 
+                method: 'POST', mode: 'no-cors', 
+                body: JSON.stringify({ action: 'RESET_SINGLE', plate: p }) 
+            }); 
+            setTimeout(syncData, 1500); 
+        }
+    }
+
+    function toggleAdmin() { 
+        const el = document.getElementById('admin'); 
+        el.style.display = el.style.display==='none'?'block':'none'; 
+    }
+
+    function addCar() {
+        const p = document.getElementById('newP').value;
+        const d = document.getElementById('newD').value;
+        const ph = document.getElementById('newPh').value;
+        if(p && d && ph) { 
+            fleet.push({ plate: p, driver: d, phone: ph }); 
+            localStorage.setItem('fleet_v21', JSON.stringify(fleet)); 
+            document.getElementById('newP').value=''; 
+            document.getElementById('newD').value=''; 
+            document.getElementById('newPh').value='';
+            render(); 
+            toggleAdmin(); 
+        }
     }
 
     window.onload = syncData;
-    setInterval(syncData, 30000);
+    setInterval(syncData, 30000); // Sync ທຸກໆ 30 ວິນາທີ
 </script>
 </body>
 </html>
