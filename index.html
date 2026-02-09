@@ -74,7 +74,7 @@
 
 <div class="container">
     <header>
-        <h2 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">v22.0</span></h2>
+        <h2 style="margin:0; letter-spacing: -1px;">🚛 Fleet Master <span style="color:var(--accent)">v22.0</span></h2>
         <button class="btn" style="width:auto; font-size:12px; background:rgba(255,255,255,0.1); color:white; padding:10px 20px;" onclick="toggleAdmin()">⚙️ ຈັດການລົດ</button>
     </header>
 
@@ -111,8 +111,8 @@
 </div>
 
 <script>
-    // --- ວາງ API URL ຂອງທ່ານທີ່ນີ້ (ລິ້ງ /exec) ---
-    const API_URL = "https://script.google.com/macros/s/AKfycbxZ45IixjUWHIFGszNHulbcbHKPJzEnuXvlDm5DVVo4ZBgfjqxTkva7jSzrxoFONNM2/exec";
+    // --- ວາງ Web App URL (ລິ້ງ /exec) ຂອງທ່ານທີ່ນີ້ ---
+    const API_URL = "https://script.google.com/macros/s/AKfycbwTMfD4es7Wgs6olfXBCdb7Yx8qBB4C2i4SbVUiR7SMg1uGsIUEebh8iSP1oGUJwWm1/exec";
 
     let fleet = JSON.parse(localStorage.getItem('fleet_v21')) || [
         { plate: 'ບກ 3301', driver: 'ຄົນຂັບ 1', phone: '020 55512301' },
@@ -307,7 +307,7 @@
     }
 
     window.onload = syncData;
-    setInterval(syncData, 30000);
+    setInterval(syncData, 30000); // Sync ທຸກໆ 30 ວິນາທີ
 </script>
 </body>
 </html>
