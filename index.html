@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Master v22.0 - Stable Pro</title>
+    <title>Fleet Master v22.0 - Ultra Stable Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -19,11 +19,7 @@
             font-family: 'Noto Sans Lao', sans-serif; 
             background: var(--bg); 
             background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
-            color: #fff; 
-            margin: 0; 
-            padding: 15px; 
-            padding-bottom: 150px; 
-            min-height: 100vh;
+            color: #fff; margin: 0; padding: 15px; padding-bottom: 150px; min-height: 100vh;
         }
 
         .container { max-width: 1000px; margin: auto; }
@@ -31,22 +27,13 @@
         header {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
         }
 
         .panel { 
-            background: var(--card); 
-            color: #1e293b; 
-            padding: 25px; 
-            border-radius: 20px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
+            background: var(--card); color: #1e293b; padding: 25px; 
+            border-radius: 20px; margin-bottom: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
         }
 
         textarea, input { 
@@ -92,7 +79,7 @@
     </header>
 
     <div id="admin" style="display:none;" class="panel">
-        <h4 style="margin-top:0;">➕ ເພີ່ມ/ແກ້ໄຂຂໍ້ມູນລົດ</h4>
+        <h4 style="margin-top:0;">➕ ເພີ່ມ/ຈັດການລົດ</h4>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
             <input type="text" id="newP" placeholder="ທະບຽນລົດ">
             <input type="text" id="newD" placeholder="ຊື່ຄົນຂັບ">
@@ -124,8 +111,8 @@
 </div>
 
 <script>
-    // --- ໃຊ້ API URL ທີ່ທ່ານ Deploy ຫຼ້າສຸດ ---
-    const API_URL = "https://script.google.com/macros/s/AKfycbxtWh6TfvIH5rjVttyFmtQ6acT3aGQ1m1mPBU39bANBOpswokuAqfRqZu2Wxu9IAp7m/exec";
+    // --- ວາງ API URL ຂອງທ່ານທີ່ນີ້ (ລິ້ງ /exec) ---
+    const API_URL = "https://script.google.com/macros/s/AKfycbwTMfD4es7Wgs6olfXBCdb7Yx8qBB4C2i4SbVUiR7SMg1uGsIUEebh8iSP1oGUJwWm1/exec";
 
     let fleet = JSON.parse(localStorage.getItem('fleet_v21')) || [
         { plate: 'ບກ 3301', driver: 'ຄົນຂັບ 1', phone: '020 55512301' },
@@ -139,33 +126,43 @@
     let selectedPlates = [];
     const VIVID_COLORS = ["#2563eb", "#d97706", "#7c3aed", "#db2777", "#059669", "#dc2626", "#4f46e5", "#ea580c"];
 
+    // ຟັງຊັນປ່ຽນ ISO ເປັນ ວັນ/ເດືອນ/ປີ ໂມງ:ນາທີ
+    function formatToLaoDate(isoString) {
+        if (!isoString) return "-";
+        const date = new Date(isoString);
+        const d = date.getDate().toString().padStart(2, '0');
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const y = date.getFullYear();
+        const hr = date.getHours().toString().padStart(2, '0');
+        const min = date.getMinutes().toString().padStart(2, '0');
+        return `${d}/${m}/${y} ${hr}:${min}`;
+    }
+
     async function syncData() {
         try {
             const res = await fetch(API_URL);
-            const data = await res.json();
-            // ຖ້າ Apps Script ແຈ້ງ error ບອກວ່າຫາ Sheet ບໍ່ເຫັນ
-            if (data.error) {
-                alert("⚠️ " + data.message);
-                return;
-            }
-            cloudData = data;
+            cloudData = await res.json();
             render();
-        } catch (e) { 
-            console.log("Sync Error:", e);
-            render(); 
-        }
+        } catch (e) { render(); }
     }
 
     function render() {
         const container = document.getElementById('fleet');
         const tid = document.getElementById('tourID').value;
+        const now = new Date(); // ເວລາປະຈຸບັນ
         container.innerHTML = '';
 
         fleet.forEach(car => {
-            const busy = cloudData.find(c => c.plate === car.plate && c.status !== "Done");
+            // Auto-Available Logic: ຖ້າໝົດເວລາ endTime ແລ້ວ ຈະຖືວ່າຫວ່າງ
+            const busy = cloudData.find(c => 
+                c.plate === car.plate && 
+                c.status !== "Done" && 
+                new Date(c.endTime) > now
+            );
+
             const isSelected = selectedPlates.includes(car.plate);
             
-            // FIFO Logic: ຊອກຫາເວລາພັກລ່າສຸດຈາກ Timestamp ໃນຖັນ A
+            // FIFO Logic: ຊອກຫາເວລາພັກລ່າສຸດຈາກ Timestamp
             const history = cloudData.filter(d => d.plate === car.plate);
             const lastWork = history.length > 0 ? new Date(Math.max(...history.map(h => new Date(h.timestamp)))) : null;
             
@@ -180,7 +177,7 @@
                 <div class="driver-info">👤 ${car.driver}</div>
                 <div style="font-size:13px;color:#64748b;">📞 ${car.phone}</div>
                 ${busy ? `<div style="font-size:11px; color:${tourColor}; margin-top:10px; font-weight:bold;">📍 ${busy.tourLoc}</div>` : 
-                `<div class="queue-info">💤 ພັກຕັ້ງແຕ່: ${lastWork ? lastWork.toLocaleString('lo-LA') : 'ບໍ່ມີປະຫວັດ'}</div>`}
+                `<div class="queue-info">💤 ພັກຕັ້ງແຕ່: ${lastWork ? formatToLaoDate(lastWork) : 'ບໍ່ມີປະຫວັດ'}</div>`}
                 <div style="display:flex; gap:5px;">
                     <button class="btn-action" onclick="event.stopPropagation(); editDriver('${car.plate}')">✏️ ແກ້ໄຂ</button>
                     <button class="btn-action" style="color:red" onclick="event.stopPropagation(); deleteCar('${car.plate}')">🗑️ ລຶບ</button>
@@ -207,7 +204,7 @@
         const pM = text.match(/(\d+)\s*ຄົນ/i) || text.match(/(?:ຈຳນວນຄົນ|ຄົນ)\s*(\d+)/i);
         if(pM) document.getElementById('tourDetail').value = pM[0];
 
-        // --- ດຶງວັນທີ ແລະ ເວລາອັດຕະໂນມັດ ---
+        // ດຶງວັນທີ ແລະ ເວລາອັດຕະໂນມັດ
         const lines = text.split('\n');
         let dates = [];
         lines.forEach(l => {
@@ -238,11 +235,12 @@
         const q = parseInt(document.getElementById('qty').value) || 0;
         if (q <= 0) return alert("ກະລຸນາໃສ່ຈຳນວນລົດ!");
 
-        // ຫາລົດທີ່ຫວ່າງ (ບໍ່ມີສະຖານະ Active)
-        const busyP = new Set(cloudData.filter(d => d.status !== "Done").map(d => d.plate));
+        const now = new Date();
+        // ກວດເຊັກລົດທີ່ຫວ່າງແທ້ໆ (ບໍ່ຕິດທົວທີ່ຍັງບໍ່ໝົດເວລາ)
+        const busyP = new Set(cloudData.filter(d => d.status !== "Done" && new Date(d.endTime) > now).map(d => d.plate));
         let free = fleet.filter(c => !busyP.has(c.plate));
 
-        // ຈັດລຽງຕາມ FIFO: ໃຜພັກດົນສຸດ (Timestamp ເກົ່າສຸດ) ໄດ້ວຽກກ່ອນ
+        // FIFO Queue Logic
         free.sort((a,b) => {
             const hA = cloudData.filter(d => d.plate === a.plate);
             const hB = cloudData.filter(d => d.plate === b.plate);
@@ -253,98 +251,63 @@
 
         selectedPlates = free.slice(0, q).map(c => c.plate);
         render();
-        alert(`✅ ເລືອກລົດໃຫ້ ${selectedPlates.length} ຄັນ ຕາມລຳດັບຄິວພັກຜ່ອນ.`);
     }
 
     async function saveAndSend() {
-        const tid = document.getElementById('tourID').value;
-        const det = document.getElementById('tourDetail').value;
-        const s = document.getElementById('startTime').value;
-        const e = document.getElementById('endTime').value;
-        
-        if(!tid || !selectedPlates.length) return alert("ກະລຸນາເລືອກລົດ ແລະ ໃສ່ລະຫັດທົວ!");
+        const tid = document.getElementById('tourID').value, det = document.getElementById('tourDetail').value;
+        const s = document.getElementById('startTime').value, e = document.getElementById('endTime').value;
+        if(!tid || !selectedPlates.length) return alert("ກະລຸນາເລືອກລົດ!");
         
         const sel = selectedPlates.map(p => fleet.find(f => f.plate === p));
         
-        // Optimistic UI Update (ສະແດງຜົນທັນທີ)
-        selectedPlates.forEach(p => {
-            cloudData.push({ plate: p, tourName: tid, tourLoc: det, status: "Active", timestamp: new Date().toISOString() });
-        });
-        selectedPlates = []; 
-        render();
+        // Optimistic UI update
+        selectedPlates.forEach(p => cloudData.push({ plate: p, tourName: tid, tourLoc: det, status: "Active", timestamp: new Date().toISOString(), endTime: e }));
+        selectedPlates = []; render();
 
-        // ສົ່ງຂໍ້ມູນລົງ Google Sheets (ຖັນ A ຫາ I)
+        // ບັນທຶກລົງ Sheet
         fetch(API_URL, { 
             method: 'POST', mode: 'no-cors', 
-            body: JSON.stringify({ 
-                tourName: tid, 
-                tourLoc: det, 
-                startTime: s, 
-                endTime: e, 
-                selectedCars: sel 
-            }) 
+            body: JSON.stringify({ tourName: tid, tourLoc: det, startTime: s, endTime: e, selectedCars: sel }) 
         });
 
-        // ສົ່ງແຈ້ງການທາງ WhatsApp
-        const msg = `🚛 *ແຈ້ງຈັດລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${det}\n📅 *ຮັບ:* ${s.replace('T',' ')}\n🏁 *ສົ່ງ:* ${e.replace('T',' ')}\n----------\n` + 
+        // ສົ່ງ WhatsApp (ໃຊ້ Lao Date Format)
+        const msg = `🚛 *ແຈ້ງຈັດລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${det}\n📅 *ຮັບ:* ${formatToLaoDate(s)}\n🏁 *ສົ່ງ:* ${formatToLaoDate(e)}\n----------\n` + 
                     sel.map((c, i) => `${i+1}. ✅ *${c.plate}* (${c.driver})`).join('\n');
         
         window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-        setTimeout(syncData, 5000); // Sync ຂໍ້ມູນຄືນໃນ 5 ວິນາທີ
+        setTimeout(syncData, 5000);
     }
 
     function editDriver(p) {
         const i = fleet.findIndex(f => f.plate === p);
-        const nP = prompt('ທະບຽນໃໝ່:', fleet[i].plate);
-        const nD = prompt('ຊື່ຄົນຂັບໃໝ່:', fleet[i].driver);
-        const nPh = prompt('ເບີໂທໃໝ່:', fleet[i].phone);
-        if(nP && nD && nPh) { 
-            fleet[i] = { plate: nP, driver: nD, phone: nPh }; 
-            localStorage.setItem('fleet_v21', JSON.stringify(fleet)); 
-            render(); 
-        }
+        const nP = prompt('ທະບຽນໃໝ່:', fleet[i].plate), nD = prompt('ຊື່ຄົນຂັບໃໝ່:', fleet[i].driver), nPh = prompt('ເບີໂທໃໝ່:', fleet[i].phone);
+        if(nP && nD && nPh) { fleet[i] = {plate:nP, driver:nD, phone:nPh}; localStorage.setItem('fleet_v21', JSON.stringify(fleet)); render(); }
     }
 
     function deleteCar(p) {
-        if(confirm(`ຢືນຢັນການລົບລົດ ${p} ອອກຈາກລາຍຊື່?`)) { 
-            fleet = fleet.filter(f => f.plate !== p); 
-            localStorage.setItem('fleet_v21', JSON.stringify(fleet)); 
-            render(); 
-        }
+        if(confirm(`ຢືນຢັນການລົບລົດ ${p}?`)) { fleet = fleet.filter(f => f.plate !== p); localStorage.setItem('fleet_v21', JSON.stringify(fleet)); render(); }
     }
 
     async function forceReset(p) {
-        if(confirm(`Reset ລົດ ${p} ໃຫ້ຫວ່າງ (Done)?`)) { 
-            await fetch(API_URL, { 
-                method: 'POST', mode: 'no-cors', 
-                body: JSON.stringify({ action: 'RESET_SINGLE', plate: p }) 
-            }); 
+        if(confirm(`Reset ລົດ ${p} ໃຫ້ຫວ່າງ?`)) { 
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'RESET_SINGLE', plate: p }) }); 
             setTimeout(syncData, 1500); 
         }
     }
 
-    function toggleAdmin() { 
-        const el = document.getElementById('admin'); 
-        el.style.display = el.style.display==='none'?'block':'none'; 
-    }
-
+    function toggleAdmin() { const el = document.getElementById('admin'); el.style.display = el.style.display==='none'?'block':'none'; }
     function addCar() {
-        const p = document.getElementById('newP').value;
-        const d = document.getElementById('newD').value;
-        const ph = document.getElementById('newPh').value;
+        const p = document.getElementById('newP').value, d = document.getElementById('newD').value, ph = document.getElementById('newPh').value;
         if(p && d && ph) { 
-            fleet.push({ plate: p, driver: d, phone: ph }); 
+            fleet.push({plate:p, driver:d, phone:ph}); 
             localStorage.setItem('fleet_v21', JSON.stringify(fleet)); 
-            document.getElementById('newP').value=''; 
-            document.getElementById('newD').value=''; 
-            document.getElementById('newPh').value='';
-            render(); 
-            toggleAdmin(); 
+            document.getElementById('newP').value=''; document.getElementById('newD').value=''; document.getElementById('newPh').value='';
+            render(); toggleAdmin(); 
         }
     }
 
     window.onload = syncData;
-    setInterval(syncData, 30000); // Sync ທຸກໆ 30 ວິນາທີ
+    setInterval(syncData, 30000);
 </script>
 </body>
 </html>
