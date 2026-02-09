@@ -74,7 +74,7 @@
 
 <div class="container">
     <header>
-        <h2 style="margin:0; letter-spacing: -1px;">🚛 Fleet Master <span style="color:var(--accent)">v22.0</span></h2>
+        <h2 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">v22.0</span></h2>
         <button class="btn" style="width:auto; font-size:12px; background:rgba(255,255,255,0.1); color:white; padding:10px 20px;" onclick="toggleAdmin()">⚙️ ຈັດການລົດ</button>
     </header>
 
@@ -111,8 +111,7 @@
 </div>
 
 <script>
-    // --- ວາງ Web App URL (ລິ້ງ /exec) ຂອງທ່ານທີ່ນີ້ ---
-    const API_URL = "https://script.google.com/macros/s/AKfycbx2_4CqtzcDopqLmcRoRN5RHs6cy2k0y5_MYItPYFD3NTXWuxIjzzuWhcGTdKOv3A8u/exec";
+    const API_URL = "";
 
     let fleet = JSON.parse(localStorage.getItem('fleet_v21')) || [
         { plate: 'ບກ 3301', driver: 'ຄົນຂັບ 1', phone: '020 55512301' },
@@ -149,11 +148,11 @@
     function render() {
         const container = document.getElementById('fleet');
         const tid = document.getElementById('tourID').value;
-        const now = new Date(); // ເວລາປະຈຸບັນ
+        const now = new Date();
         container.innerHTML = '';
 
         fleet.forEach(car => {
-            // Auto-Available Logic: ຖ້າໝົດເວລາ endTime ແລ້ວ ຈະຖືວ່າຫວ່າງ
+            // Logic ໃໝ່: ຖ້າໝົດເວລາ endTime ແລ້ວ ຈະຖືວ່າຫວ່າງອັດຕະໂນມັດ
             const busy = cloudData.find(c => 
                 c.plate === car.plate && 
                 c.status !== "Done" && 
@@ -162,7 +161,6 @@
 
             const isSelected = selectedPlates.includes(car.plate);
             
-            // FIFO Logic: ຊອກຫາເວລາພັກລ່າສຸດຈາກ Timestamp
             const history = cloudData.filter(d => d.plate === car.plate);
             const lastWork = history.length > 0 ? new Date(Math.max(...history.map(h => new Date(h.timestamp)))) : null;
             
@@ -204,7 +202,6 @@
         const pM = text.match(/(\d+)\s*ຄົນ/i) || text.match(/(?:ຈຳນວນຄົນ|ຄົນ)\s*(\d+)/i);
         if(pM) document.getElementById('tourDetail').value = pM[0];
 
-        // ດຶງວັນທີ ແລະ ເວລາອັດຕະໂນມັດ
         const lines = text.split('\n');
         let dates = [];
         lines.forEach(l => {
@@ -233,14 +230,9 @@
 
     function autoMatch() {
         const q = parseInt(document.getElementById('qty').value) || 0;
-        if (q <= 0) return alert("ກະລຸນາໃສ່ຈຳນວນລົດ!");
-
         const now = new Date();
-        // ກວດເຊັກລົດທີ່ຫວ່າງແທ້ໆ (ບໍ່ຕິດທົວທີ່ຍັງບໍ່ໝົດເວລາ)
         const busyP = new Set(cloudData.filter(d => d.status !== "Done" && new Date(d.endTime) > now).map(d => d.plate));
         let free = fleet.filter(c => !busyP.has(c.plate));
-
-        // FIFO Queue Logic
         free.sort((a,b) => {
             const hA = cloudData.filter(d => d.plate === a.plate);
             const hB = cloudData.filter(d => d.plate === b.plate);
@@ -248,7 +240,6 @@
             const tB = hB.length ? new Date(Math.max(...hB.map(x => new Date(x.timestamp)))) : new Date(0);
             return tA - tB;
         });
-
         selectedPlates = free.slice(0, q).map(c => c.plate);
         render();
     }
@@ -260,17 +251,14 @@
         
         const sel = selectedPlates.map(p => fleet.find(f => f.plate === p));
         
-        // Optimistic UI update
         selectedPlates.forEach(p => cloudData.push({ plate: p, tourName: tid, tourLoc: det, status: "Active", timestamp: new Date().toISOString(), endTime: e }));
         selectedPlates = []; render();
 
-        // ບັນທຶກລົງ Sheet
         fetch(API_URL, { 
             method: 'POST', mode: 'no-cors', 
             body: JSON.stringify({ tourName: tid, tourLoc: det, startTime: s, endTime: e, selectedCars: sel }) 
         });
 
-        // ສົ່ງ WhatsApp (ໃຊ້ Lao Date Format)
         const msg = `🚛 *ແຈ້ງຈັດລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${det}\n📅 *ຮັບ:* ${formatToLaoDate(s)}\n🏁 *ສົ່ງ:* ${formatToLaoDate(e)}\n----------\n` + 
                     sel.map((c, i) => `${i+1}. ✅ *${c.plate}* (${c.driver})`).join('\n');
         
