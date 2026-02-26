@@ -3,139 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fleet Master v22.0 - Stable Pro</title>
+    <title>Fleet Master v22.0 - Pro Sync</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root { 
-            --primary: #e11d48; --primary-hover: #be123c;
-            --bg: #0f172a; --card-light: #ffffff; 
-            --whatsapp: #22c55e; --accent: #38bdf8;
-            --text-muted: #64748b;
-        }
-        
-        body { 
-            font-family: 'Noto Sans Lao', sans-serif; 
-            background: var(--bg); background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
-            color: #fff; margin: 0; padding: 15px; padding-bottom: 120px; min-height: 100vh;
-        }
-
+        :root { --primary: #e11d48; --bg: #0f172a; --card: #ffffff; --whatsapp: #22c55e; --accent: #38bdf8; }
+        body { font-family: 'Noto Sans Lao', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 15px; padding-bottom: 120px; }
         .container { max-width: 900px; margin: auto; }
-
-        header {
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px);
-            padding: 18px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 10px; z-index: 100;
-        }
-
-        .panel { 
-            background: var(--card-light); color: #1e293b; padding: 20px; 
-            border-radius: 20px; margin-bottom: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
-        }
-
-        label { font-size: 11px; color: #64748b; font-weight: 800; margin-bottom: 6px; display: block; text-transform: uppercase; }
-        input, textarea { 
-            width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; 
-            margin-bottom: 12px; box-sizing: border-box; font-family: inherit; font-size: 16px; 
-        }
-
+        header { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .panel { background: var(--card); color: #1e293b; padding: 20px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; font-size: 16px; box-sizing: border-box; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-        
-        .car-card { 
-            background: #fff; color: #1e293b; padding: 18px; border-radius: 18px; 
-            border-left: 8px solid #cbd5e1; transition: 0.3s; cursor: pointer; border: 1px solid #eef2f6;
-        }
-        .car-card.selected { background: #f0f9ff; border-left: 8px solid var(--accent); transform: translateY(-3px); }
-        .car-card.busy { opacity: 0.7; cursor: not-allowed; filter: grayscale(0.5); }
-        
-        .plate { font-size: 1.6rem; font-weight: 900; display: block; color: #0f172a; }
-
-        .btn { border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .car-card { background: #fff; color: #1e293b; padding: 15px; border-radius: 15px; border-left: 8px solid #cbd5e1; transition: 0.3s; cursor: pointer; border: 1px solid #eee; }
+        .car-card.selected { border-left-color: var(--accent); background: #f0f9ff; transform: translateY(-3px); }
+        .car-card.busy { opacity: 0.6; cursor: not-allowed; filter: grayscale(0.8); }
+        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
         .btn-main { background: var(--primary); color: #fff; }
         .btn-accent { background: var(--accent); color: white; }
-        .btn-outline { background: transparent; border: 1.5px solid #e2e8f0; color: #64748b; font-size: 12px; padding: 6px 12px; width: auto; }
-
-        #waBtn { 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
-            width: 90%; max-width: 450px; background: var(--whatsapp); color: white; 
-            z-index: 1000; box-shadow: 0 10px 30px rgba(34, 197, 94, 0.4); font-size: 18px; height: 60px;
-        }
+        #waBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 450px; background: var(--whatsapp); color: white; z-index: 1000; box-shadow: 0 10px 30px rgba(34, 197, 94, 0.4); font-size: 18px; height: 55px; }
+        .loading { text-align: center; padding: 20px; color: var(--accent); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h2 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">v22.0</span></h2>
-        <button class="btn btn-outline" style="color:white;" onclick="toggleAdmin()">⚙️ ຈັດການລົດ</button>
+        <h3 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">Sync v22</span></h3>
+        <button class="btn" style="width:auto; background:rgba(255,255,255,0.1); color:white;" onclick="toggleAdmin()">⚙️ ຈັດການລົດ</button>
     </header>
 
     <div id="admin" style="display:none;" class="panel">
-        <h3 style="margin-top:0;">➕ ເພີ່ມລົດ</h3>
+        <h4 style="margin-top:0;">➕ ເພີ່ມ/ແກ້ໄຂລົດໃນ Cloud</h4>
         <input type="text" id="newP" placeholder="ທະບຽນລົດ">
         <input type="text" id="newD" placeholder="ຊື່ຄົນຂັບ">
         <input type="text" id="newPh" placeholder="ເບີໂທ">
-        <button class="btn btn-main" onclick="addCar()">💾 ບັນທຶກ</button>
+        <button class="btn btn-main" onclick="addCar()">💾 ບັນທຶກລົງ Cloud</button>
     </div>
 
     <div class="panel">
         <button class="btn btn-accent" style="margin-bottom:10px;" onclick="pasteFromClipboard()">📋 ວາງຂໍ້ຄວາມອັດຕະໂນມັດ</button>
-        <textarea id="rawText" rows="3" placeholder="ວາງຂໍ້ຄວາມ WhatsApp ທີ່ນີ້..." oninput="parseWhatsApp()"></textarea>
-        
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-            <div><label>🆔 ລະຫັດທົວ:</label><input type="text" id="tourID" oninput="render()"></div>
-            <div><label>🔢 ຈຳນວນລົດ:</label><input type="number" id="qty"></div>
+        <textarea id="rawText" rows="3" placeholder="ວາງຂໍ້ຄວາມ WhatsApp..." oninput="parseWhatsApp()"></textarea>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <input type="text" id="tourID" placeholder="ລະຫັດທົວ" oninput="render()">
+            <input type="number" id="qty" placeholder="ຈຳນວນລົດ">
         </div>
-        <label>📍 ລາຍລະອຽດ:</label>
-        <textarea id="tourDetail" rows="2"></textarea>
-        
         <button class="btn" style="background:#1e293b; color:white;" onclick="autoMatch()">⚖️ ເລືອກລົດຕາມຄິວ (FIFO)</button>
     </div>
 
+    <div id="status" class="loading">🔄 ກຳລັງໂຫຼດຂໍ້ມູນ...</div>
     <div id="fleet" class="grid"></div>
+
     <button id="waBtn" class="btn" onclick="saveAndSend()">🚀 ບັນທຶກ & ສົ່ງ WhatsApp</button>
 </div>
 
 <script>
-    // URL ທີ່ທ່ານໃຫ້ມາ
     const API_URL = "https://script.google.com/macros/s/AKfycbzlAgop88oP6pG87Hst0YyoNJ6t2N3rVEnibqgEUTAbzooOcvezT87uR-vf6wyt4Lw/exec";
     
-    let fleet = JSON.parse(localStorage.getItem('fleet_v22')) || [
-        { plate: 'ບກ 3301', driver: 'ຄົນຂັບ 1', phone: '020 55512301' },
-        { plate: 'ບກ 3302', driver: 'ຄົນຂັບ 2', phone: '020 55512302' },
-        { plate: 'ບກ 3303', driver: 'ຄົນຂັບ 3', phone: '020 55512303' }
-    ];
-
-    let cloudData = [];
+    let fleet = []; 
+    let assignments = []; 
     let selectedPlates = [];
 
+    // 1. Sync Data from Cloud
     async function syncData() {
+        document.getElementById('status').style.display = 'block';
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
-            cloudData = data.error ? [] : data;
+            fleet = data.fleet || [];
+            assignments = data.tours || [];
+            document.getElementById('status').style.display = 'none';
             render();
-        } catch (e) { render(); }
+        } catch (e) {
+            document.getElementById('status').innerText = "❌ ການເຊື່ອມຕໍ່ຜິດພາດ";
+        }
     }
 
+    // 2. Render Fleet UI
     function render() {
         const container = document.getElementById('fleet');
+        const tid = document.getElementById('tourID').value;
         container.innerHTML = '';
+
         fleet.forEach(car => {
-            const isBusy = cloudData.find(c => c.plate === car.plate && c.status !== "Done");
+            const isBusy = assignments.find(a => a.plate === car.plate && a.status !== "Done");
             const isSelected = selectedPlates.includes(car.plate);
-            const history = cloudData.filter(d => d.plate === car.plate);
-            const lastWork = history.length > 0 ? new Date(Math.max(...history.map(h => new Date(h.timestamp)))) : null;
             
+            // FIFO Queue Logic
+            const history = assignments.filter(a => a.plate === car.plate);
+            const lastWork = history.length > 0 ? new Date(Math.max(...history.map(h => new Date(h.timestamp)))) : null;
+
             const card = document.createElement('div');
             card.className = `car-card ${isSelected ? 'selected' : ''} ${isBusy ? 'busy' : ''}`;
             card.innerHTML = `
-                <span class="plate">${car.plate}</span>
-                <div style="font-weight:700;">👤 ${car.driver}</div>
-                <div style="font-size:12px; color:var(--text-muted);">💤 ພັກແຕ່: ${lastWork ? lastWork.toLocaleTimeString() : 'ຫວ່າງ'}</div>
-                <div style="margin-top:10px;">
-                    <button class="btn-outline" onclick="event.stopPropagation(); deleteCar('${car.plate}')">🗑️ ລຶບ</button>
+                <span style="font-size:10px; float:right; color:#94a3b8;">${isBusy ? '🔴 ບໍ່ຫວ່າງ' : '🟢 ຫວ່າງ'}</span>
+                <b style="font-size:1.5rem; display:block;">${car.plate}</b>
+                <div style="margin-top:5px;">👤 ${car.driver}</div>
+                <div style="font-size:12px; color:#64748b; margin-top:5px; border-top:1px solid #eee; padding-top:5px;">
+                    ${isBusy ? `📍 ກຳລັງໄປ: ${isBusy.tourName}` : `💤 ພັກແຕ່: ${lastWork ? lastWork.toLocaleTimeString('lo-LA') : 'ຫວ່າງຍາວ'}`}
+                </div>
+                <div style="margin-top:10px; display:flex; gap:5px;">
+                    <button style="font-size:10px; border:none; background:#fee2e2; color:#ef4444; border-radius:5px; padding:4px 8px;" onclick="event.stopPropagation(); deleteCar('${car.plate}')">🗑️ ລຶບ</button>
                 </div>
             `;
             card.onclick = () => { if(!isBusy) toggleSelect(car.plate); };
@@ -143,52 +109,93 @@
         });
     }
 
-    function parseWhatsApp() {
-        const text = document.getElementById('rawText').value;
-        const idMatch = text.match(/([0-9]{4}[A-Z])/i);
-        if(idMatch) document.getElementById('tourID').value = idMatch[0];
-        const qtyMatch = text.match(/(\d+)\s*ຄັນ/);
-        if(qtyMatch) document.getElementById('qty').value = qtyMatch[1];
-        render();
-    }
-
-    function autoMatch() {
-        const q = parseInt(document.getElementById('qty').value) || 0;
-        const busyPlates = new Set(cloudData.filter(d => d.status !== "Done").map(d => d.plate));
-        let freeCars = fleet.filter(c => !busyPlates.has(c.plate));
-        freeCars.sort((a,b) => {
-            const tA = cloudData.filter(d => d.plate === a.plate).reduce((acc, curr) => Math.max(acc, new Date(curr.timestamp)), 0);
-            const tB = cloudData.filter(d => d.plate === b.plate).reduce((acc, curr) => Math.max(acc, new Date(curr.timestamp)), 0);
-            return tA - tB;
+    // 3. Cloud Fleet Management (Add/Delete)
+    async function updateCloudFleet(newFleet) {
+        document.getElementById('status').style.display = 'block';
+        document.getElementById('status').innerText = "⏳ ກຳລັງອັບເດດ Cloud...";
+        
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'UPDATE_FLEET', fleet: newFleet })
         });
-        selectedPlates = freeCars.slice(0, q).map(c => c.plate);
-        render();
+        
+        setTimeout(syncData, 2000); 
     }
 
-    async function saveAndSend() {
-        const tid = document.getElementById('tourID').value;
-        const det = document.getElementById('tourDetail').value;
-        if(!tid || !selectedPlates.length) return alert("ຂໍ້ມູນບໍ່ຄົບ!");
-
-        const sel = selectedPlates.map(p => fleet.find(f => f.plate === p));
-        fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tourName: tid, tourLoc: det, selectedCars: sel }) });
-
-        const msg = `🚛 *ແຈ້ງຈັດລົດ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${det}\n` + sel.map((c, i) => `${i+1}. ✅ *${c.plate}*`).join('\n');
-        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    function addCar() {
+        const p = document.getElementById('newP').value;
+        const d = document.getElementById('newD').value;
+        const ph = document.getElementById('newPh').value;
+        if(p && d) {
+            const updated = [...fleet, { plate: p, driver: d, phone: ph }];
+            updateCloudFleet(updated);
+            document.getElementById('newP').value=''; document.getElementById('newD').value='';
+            toggleAdmin();
+        }
     }
 
+    function deleteCar(plate) {
+        if(confirm(`ຢືນຢັນການລຶບລົດ ${plate}?`)) {
+            const updated = fleet.filter(c => c.plate !== plate);
+            updateCloudFleet(updated);
+        }
+    }
+
+    // 4. Tour Logic
     function toggleSelect(p) {
         const i = selectedPlates.indexOf(p);
         if(i > -1) selectedPlates.splice(i, 1); else selectedPlates.push(p);
         render();
     }
-    function toggleAdmin() { const el = document.getElementById('admin'); el.style.display = el.style.display==='none'?'block':'none'; }
-    function addCar() {
-        const p = document.getElementById('newP').value, d = document.getElementById('newD').value, ph = document.getElementById('newPh').value;
-        if(p && d && ph) { fleet.push({ plate: p, driver: d, phone: ph }); localStorage.setItem('fleet_v22', JSON.stringify(fleet)); render(); toggleAdmin(); }
+
+    function autoMatch() {
+        const q = parseInt(document.getElementById('qty').value) || 0;
+        const busyPlates = new Set(assignments.filter(a => a.status !== "Done").map(a => a.plate));
+        let free = fleet.filter(c => !busyPlates.has(c.plate));
+
+        // FIFO Sort
+        free.sort((a,b) => {
+            const tA = assignments.filter(x => x.plate === a.plate).reduce((acc, curr) => Math.max(acc, new Date(curr.timestamp)), 0);
+            const tB = assignments.filter(x => x.plate === b.plate).reduce((acc, curr) => Math.max(acc, new Date(curr.timestamp)), 0);
+            return tA - tB;
+        });
+
+        selectedPlates = free.slice(0, q).map(c => c.plate);
+        render();
     }
-    function deleteCar(p) { if(confirm(`ລຶບລົດ ${p}?`)) { fleet = fleet.filter(f => f.plate !== p); localStorage.setItem('fleet_v22', JSON.stringify(fleet)); render(); } }
+
+    async function saveAndSend() {
+        const tid = document.getElementById('tourID').value;
+        if(!tid || !selectedPlates.length) return alert("ປ້ອນຂໍ້ມູນບໍ່ຄົບ!");
+
+        const sel = selectedPlates.map(p => fleet.find(f => f.plate === p));
+        
+        // POST to Cloud (Save Assignment)
+        fetch(API_URL, { 
+            method: 'POST', mode: 'no-cors', 
+            body: JSON.stringify({ tourName: tid, tourLoc: document.getElementById('rawText').value, selectedCars: sel }) 
+        });
+
+        const msg = `🚛 *ແຈ້ງຈັດລົດ: ${tid}*\n` + sel.map((c, i) => `${i+1}. ✅ *${c.plate}* (${c.driver})`).join('\n');
+        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        
+        selectedPlates = [];
+        setTimeout(syncData, 3000);
+    }
+
+    function parseWhatsApp() {
+        const text = document.getElementById('rawText').value;
+        const idM = text.match(/([0-9]{4}[A-Z])/i); if(idM) document.getElementById('tourID').value = idM[0];
+        const qM = text.match(/(\d+)\s*ຄັນ/); if(qM) document.getElementById('qty').value = qM[1];
+        render();
+    }
+
+    function toggleAdmin() { const el = document.getElementById('admin'); el.style.display = el.style.display==='none'?'block':'none'; }
+    async function pasteFromClipboard() { try { const t = await navigator.clipboard.readText(); document.getElementById('rawText').value = t; parseWhatsApp(); } catch(e) {} }
+
     window.onload = syncData;
+    setInterval(syncData, 60000); // Sync ທຸກໆ 1 ນາທີ
 </script>
 </body>
 </html>
