@@ -3,43 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fleet Master Cloud Pro v2.6</title>
+    <title>Fleet Master Cloud Final</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #e11d48; --accent: #0ea5e9; --bg: #0f172a; }
         body { font-family: 'Noto Sans Lao', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
-        .panel { background: white; color: #1e293b; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); }
-        input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; font-family: inherit; }
-        .btn { border: none; padding: 14px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; transition: 0.2s; }
+        .panel { background: white; color: #1e293b; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 10px; font-family: inherit; }
+        .btn { border: none; padding: 15px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; }
         .btn-main { background: var(--primary); color: white; }
-        .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-        .car-card { background: white; color: #1e293b; padding: 15px; border-radius: 16px; border-left: 10px solid #cbd5e1; position: relative; }
-        .car-card.busy { border-left-color: var(--primary); background: #fff1f2; opacity: 0.8; }
-        .car-card.free { border-left-color: #22c55e; }
-        .plate { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+        .car-card { background: white; color: #333; padding: 15px; border-radius: 12px; border-left: 8px solid #22c55e; margin-bottom: 10px; }
+        .car-card.busy { border-left-color: #e11d48; background: #fff1f2; }
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
 <body>
 
-<div id="loader">⚙️ ກຳລັງເຊື່ອມຕໍ່ Cloud...</div>
+<div id="loader">🔄 ກຳລັງເຊື່ອມຕໍ່ Cloud...</div>
 
-<header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-    <div style="font-size:1.3rem; font-weight:700;">🚛 Fleet Master <span style="color:var(--accent)">Cloud</span></div>
-    <button class="btn" style="width:auto; padding:8px 15px; background:rgba(255,255,255,0.1); color:white;" onclick="syncData()">🔄 Refresh</button>
+<header style="display:flex; justify-content:space-between; margin-bottom:20px;">
+    <b>🚛 Fleet Master Cloud</b>
+    <button onclick="syncData()" style="color:var(--accent); background:none; border:none; cursor:pointer;">🔄 Refresh</button>
 </header>
 
 <div class="panel">
-    <h3 style="margin-top:0; color:#334155;">➕ ເພີ່ມລົດໃໝ່</h3>
-    <input type="text" id="newP" placeholder="ທະບຽນລົດ (ກກ 1111)">
+    <h3 style="margin-top:0; color:#333;">➕ ເພີ່ມລົດໃໝ່</h3>
+    <input type="text" id="newP" placeholder="ທະບຽນລົດ">
     <input type="text" id="newD" placeholder="ຊື່ຄົນຂັບ">
     <input type="text" id="newPh" placeholder="ເບີໂທ">
-    <button class="btn btn-main" onclick="addCar()">💾 ບັນທຶກລົງ Cloud</button>
+    <button class="btn btn-main" onclick="addCar()">💾 ບັນທຶກລົງ Google Sheet</button>
 </div>
 
-<div id="fleet" class="fleet-grid"></div>
+<div id="fleet"></div>
 
 <script>
+    // ⚠️ ນຳ URL ໃໝ່ທີ່ໄດ້ຈາກການ Deploy ເປັນ "Anyone" ມາປ່ຽນບ່ອນນີ້!
     const API_URL = "https://script.google.com/macros/s/AKfycbx_G-1Kcvk6nQM6mFobzsLV_p_MATCKXKLVUa4Gg7jMfYa-FH2ugHmCZW8Qh17eK1w/exec";
 
     async function syncData() {
@@ -47,40 +45,31 @@
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
-            render(data.fleet, data.tours);
-        } catch (e) {
-            alert("❌ ບໍ່ສາມາດເຊື່ອມຕໍ່ Cloud ໄດ້! ກະລຸນາກວດສອບ Deployment URL");
-        } finally {
-            document.getElementById('loader').style.display = 'none';
-        }
-    }
-
-    function render(fleet, tours) {
-        const container = document.getElementById('fleet');
-        container.innerHTML = fleet.length === 0 ? '<p style="text-align:center;">--- ບໍ່ມີຂໍ້ມູນລົດ ---</p>' : '';
-        
-        fleet.forEach(car => {
-            const active = tours.find(t => t.plate === car.plate && t.status === "Active");
-            const card = document.createElement('div');
-            card.className = `car-card ${active ? 'busy' : 'free'}`;
-            card.innerHTML = `
-                <div style="font-size:10px; position:absolute; top:10px; right:10px; color:${active ? 'red' : 'green'}; font-weight:bold;">
-                    ${active ? '🔴 ບໍ່ຫວ່າງ: ' + active.tourName : '🟢 ຫວ່າງ'}
-                </div>
-                <div class="plate">${car.plate}</div>
-                <div style="font-weight:700;">👤 ${car.driver}</div>
-                <div style="font-size:12px; color:#64748b;">📞 ${car.phone}</div>
-            `;
-            container.appendChild(card);
-        });
+            const container = document.getElementById('fleet');
+            container.innerHTML = data.fleet.length === 0 ? '<p style="text-align:center;">--- ບໍ່ມີຂໍ້ມູນລົດ ---</p>' : '';
+            
+            data.fleet.forEach(car => {
+                const active = data.tours.find(t => t.plate === car.plate && t.status === "Active");
+                const card = document.createElement('div');
+                card.className = `car-card ${active ? 'busy' : ''}`;
+                card.innerHTML = `
+                    <div style="font-size:10px; float:right; color:${active ? 'red' : 'green'}; font-weight:bold;">
+                        ${active ? '🔴 ບໍ່ຫວ່າງ' : '🟢 ຫວ່າງ'}
+                    </div>
+                    <b>${car.plate}</b><br><small>👤 ${car.driver}</small>
+                    ${active ? `<br><button onclick="forceReset('${car.plate}')" style="color:red; background:none; border:none; cursor:pointer; font-size:11px;">🔄 Reset</button>` : ''}
+                `;
+                container.appendChild(card);
+            });
+        } catch (e) { alert("❌ ເຊື່ອມຕໍ່ບໍ່ໄດ້: ກະລຸນາກວດສອບ Deployment URL ແລະ ຕັ້ງເປັນ Anyone"); }
+        document.getElementById('loader').style.display = 'none';
     }
 
     async function addCar() {
-        const p = document.getElementById('newP').value.trim();
-        const d = document.getElementById('newD').value.trim();
-        const ph = document.getElementById('newPh').value.trim();
-        
-        if(!p || !d) return alert("ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບ!");
+        const p = document.getElementById('newP').value;
+        const d = document.getElementById('newD').value;
+        const ph = document.getElementById('newPh').value;
+        if(!p || !d) return alert("ປ້ອນຂໍ້ມູນໃຫ້ຄົບ!");
 
         document.getElementById('loader').style.display = 'flex';
         try {
@@ -89,18 +78,19 @@
                 mode: 'no-cors',
                 body: JSON.stringify({ action: "ADD_CAR", plate: p, driver: d, phone: ph })
             });
-
-            setTimeout(() => {
-                document.getElementById('newP').value = '';
-                document.getElementById('newD').value = '';
-                document.getElementById('newPh').value = '';
-                syncData();
+            setTimeout(() => { 
+                document.getElementById('newP').value=''; 
+                document.getElementById('newD').value=''; 
+                syncData(); 
             }, 2500);
+        } catch (e) { alert("Error: " + e); }
+    }
 
-        } catch (e) {
-            alert("❌ ເກີດຂໍ້ຜິດພາດ: " + e.message);
-            document.getElementById('loader').style.display = 'none';
-        }
+    async function forceReset(p) {
+        if(!confirm(`Reset ລົດ ${p}?`)) return;
+        document.getElementById('loader').style.display = 'flex';
+        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "RESET_SINGLE", plate: p }) });
+        setTimeout(syncData, 2000);
     }
 
     window.onload = syncData;
