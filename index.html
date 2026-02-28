@@ -63,43 +63,162 @@
 <button id="waBtn" onclick="saveAndSend()">🚀 ບັນທຶກ & ສົ່ງ WhatsApp</button>
 
 <script>
+    // 🔗 URL ล่าสุดของคุณ
     const API = "https://script.google.com/macros/s/AKfycbxO6J7Zp5lpK7Y6y0jYWvYrKP5Ygx_s9BXDYaLWIgbCrQzcsDKeIftldrYzX2tj3evF/exec";
-    let fleet = []; let history = []; let selectedPlates = [];
+    
+    let fleet = []; 
+    let history = []; 
+    let selectedPlates = [];
     let isAdminMode = false;
 
+    // 🔄 1. ซิงค์ข้อมูลจาก Google Sheets
     async function sync() {
         try {
             const res = await fetch(API);
             const data = await res.json();
-            fleet = data.fleet; history = data.activeStatus;
+            fleet = data.fleet; 
+            history = data.activeStatus;
             render();
-        } catch(e) { console.error("Sync Error"); }
+        } catch(e) { 
+            console.error("Sync Error:", e); 
+        }
     }
 
+    // 🎨 2. แสดงผลการ์ดรถ (โชว์เบอร์โทร + ปุ่ม Reset/Delete)
     function render() {
-        const grid = document.getElementById('fleetGrid'); grid.innerHTML = '';
+        const grid = document.getElementById('fleetGrid'); 
+        grid.innerHTML = '';
+        const curTid = document.getElementById('tid').value || "SEL";
+
         fleet.forEach(car => {
             const lastJob = history.filter(t => t.plate == car.plate).pop();
             const isBusy = lastJob && lastJob.status === "Busy";
             const isSelected = selectedPlates.includes(car.plate);
             
+            let color = "#cbd5e1";
+            if (isBusy) color = "#ef4444"; 
+            else if (isSelected) color = "#0ea5e9"; 
+
             const card = document.createElement('div');
             card.className = `car-card ${isBusy ? 'busy' : ''} ${isSelected ? 'selected' : ''}`;
-            
-            // เพิ่มบรรทัด 📞 ${car.phone} เพื่อแสดงเบอร์โทร
+            card.style.borderLeftColor = color;
+
             card.innerHTML = `
-                <span class="badge" style="background:${isBusy ? '#ef4444' : (isSelected ? '#0ea5e9' : '#22c55e')}">${isBusy ? lastJob.tourName : 'ຫວ່າງ'}</span>
+                <span class="badge" style="background:${color}">${isBusy ? lastJob.tourName : 'ຫວ່າງ'}</span>
                 <span class="plate">${car.plate}</span>
-                <div style="font-weight:600; font-size:13px; margin-top:5px;">👤 ${car.driver}</div>
-                <div style="color:var(--accent); font-size:12px; margin-top:2px;">📞 ${car.phone || 'ບໍ່ມີເບີ'}</div>
+                <div style="font-weight:700; font-size:15px; margin-top:5px; color:#1e293b;">👤 ${car.driver}</div>
+                
+                <div style="margin-top:5px; background:#f8fafc; padding:4px 8px; border-radius:6px; display:inline-block;">
+                    <a href="tel:${car.phone}" onclick="event.stopPropagation()" style="text-decoration:none; color:#2563eb; font-size:13px; font-weight:800;">
+                        📞 ${car.phone || '---'}
+                    </a>
+                </div>
+
                 ${isBusy ? `<button onclick="event.stopPropagation(); manageCar('RESET_SINGLE', '${car.plate}')" class="btn-action btn-reset">🔄 Reset ຫວ່າງ</button>` : ''}
                 ${isAdminMode ? `<button onclick="event.stopPropagation(); manageCar('DELETE_CAR', '${car.plate}')" class="btn-action btn-delete">❌ ລົບລົດອອກ</button>` : ''}
             `;
-            if(!isBusy && !isAdminMode) card.onclick = () => toggle(car.plate);
+            
+            if (!isBusy && !isAdminMode) card.onclick = () => toggle(car.plate);
             grid.appendChild(card);
         });
     }
 
+    // 🔍 3. ระบบอ่านข้อความ WhatsApp (Smart Parser v24.8)
+    function parseWA() {
+        const t = document.getElementById('rawWA').value;
+        const year = 2026; 
+
+        // ดึงรหัสทัวร์
+        const idMatch = t.match(/ລະຫັດທົວ:\s*([0-9A-Z]+)/i) || t.match(/([0-9]{4}[A-Z])/i);
+        if (idMatch) document.getElementById('tid').value = idMatch[1] || idMatch[0];
+
+        // ดึงจำนวนรถ
+        const qtyMatch = t.match(/ໃຊ້ລົດ\s*(\d+)/) || t.match(/(\d+)\s*(ຄັນ|คัน)/);
+        if (qtyMatch) document.getElementById('qty').value = qtyMatch[1];
+
+        // ดึงวันที่และเวลา (คัดกรองจุดไข่ปลาออก)
+        const datePattern = /(\d{1,2})[\/\-](\d{1,2})/g;
+        const timePattern = /(\d{1,2})[:.](\d{2})/g;
+        
+        let allDates = []; let d;
+        while ((d = datePattern.exec(t)) !== null) {
+            allDates.push({ day: d[1].padStart(2, '0'), month: d[2].padStart(2, '0'), index: d.index });
+        }
+
+        let allTimes = []; let tm;
+        while ((tm = timePattern.exec(t)) !== null) {
+            allTimes.push({ hour: tm[1].padStart(2, '0'), min: tm[2], index: tm.index });
+        }
+
+        // ตั้งค่าวันรับ (วันที่แรกที่เจอ)
+        if (allDates.length >= 1) {
+            const startDay = allDates[0];
+            const startTime = allTimes.find(time => time.index > startDay.index) || { hour: "08", min: "00" };
+            document.getElementById('start').value = `${year}-${startDay.month}-${startDay.day}T${startTime.hour}:${startTime.min}`;
+        }
+
+        // ตั้งค่าวันส่ง (วันสุดท้ายที่เจอ)
+        if (allDates.length >= 2) {
+            const endDay = allDates[allDates.length - 1];
+            const endTime = allTimes.filter(time => time.index > endDay.index).pop() || { hour: "17", min: "00" };
+            document.getElementById('end').value = `${year}-${endDay.month}-${endDay.day}T${endTime.hour}:${endTime.min}`;
+        }
+
+        // สรุปรายละเอียดทัวร์
+        const lines = t.split('\n');
+        let detailParts = [];
+        lines.forEach(l => {
+            if (l.includes("ຮັບ") || l.includes("ສົ່ງ") || l.includes("ທ່ຽວ") || l.includes("ຮ້ານ")) {
+                detailParts.push(l.replace(/[.:]+/g, '').trim());
+            }
+        });
+        document.getElementById('loc').value = detailParts.join(" | ");
+        
+        render();
+    }
+
+    // 🤖 4. ฟังก์ชันจับคู่รถ FIFO
+    function fifoMatch() {
+        const q = parseInt(document.getElementById('qty').value) || 0;
+        const busyP = history.filter(t => t.status === "Busy").map(t => t.plate);
+        let free = fleet.filter(c => !busyP.includes(c.plate));
+        free.sort((a,b) => {
+            const tA = history.filter(t => t.plate == a.plate).pop()?.timestamp || 0;
+            const tB = history.filter(t => t.plate == b.plate).pop()?.timestamp || 0;
+            return new Date(tA) - new Date(tB);
+        });
+        selectedPlates = free.slice(0, q).map(c => c.plate);
+        render();
+    }
+
+    // 💾 5. บันทึกและส่ง WhatsApp
+    async function saveAndSend() {
+        const tid = document.getElementById('tid').value;
+        const loc = document.getElementById('loc').value;
+        if(!tid || !selectedPlates.length) return alert("ກະລຸນາເລືອກລົດ!");
+        
+        const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
+        const btn = document.getElementById('waBtn');
+        btn.innerText = "⏳ ກຳລັງບັນທຶກ..."; btn.disabled = true;
+
+        try {
+            await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
+                action: "SAVE_TOUR", tourName: tid, location: loc,
+                start: document.getElementById('start').value, 
+                end: document.getElementById('end').value,
+                selectedCars: selCars
+            })});
+            
+            let msg = `🚛 *ແຈ້ງລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${loc}\n----------\n`;
+            selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver})\n`);
+            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+            
+            selectedPlates = []; setTimeout(sync, 1500);
+        } catch(e) { alert("Error!"); }
+        finally { btn.innerText = "🚀 ບັນທຶກ & ສົ່ງ WhatsApp"; btn.disabled = false; }
+    }
+
+    // ⚙️ 6. จัดการข้อมูลรถ (Add/Delete/Reset)
     async function manageCar(action, plate = '') {
         let payload = { action: action };
         if(action === 'ADD_CAR') {
@@ -114,9 +233,13 @@
 
         try {
             await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            if(action === 'ADD_CAR') { document.getElementById('addP').value=''; document.getElementById('addD').value=''; document.getElementById('addPh').value=''; }
+            if(action === 'ADD_CAR') { 
+                document.getElementById('addP').value=''; 
+                document.getElementById('addD').value=''; 
+                document.getElementById('addPh').value=''; 
+            }
             setTimeout(sync, 1500);
-        } catch(e) { alert("Error!"); }
+        } catch(e) { console.error(e); }
     }
 
     function toggle(p) {
@@ -125,48 +248,12 @@
         render();
     }
 
-    function parseWA() {
-        const t = document.getElementById('rawWA').value;
-        const idM = t.match(/([0-9]{4}[A-Z])/i); if(idM) document.getElementById('tid').value = idM[0];
-        const qM = t.match(/(\d+)\s*(ຄັນ|คัน)/); if(qM) document.getElementById('qty').value = qM[1];
-        render();
-    }
-
-    function fifoMatch() {
-        const q = parseInt(document.getElementById('qty').value) || 0;
-        const busyP = history.filter(t => t.status === "Busy").map(t => t.plate);
-        let free = fleet.filter(c => !busyP.includes(c.plate));
-        free.sort((a,b) => {
-            const tA = history.filter(t => t.plate == a.plate).pop()?.timestamp || 0;
-            const tB = history.filter(t => t.plate == b.plate).pop()?.timestamp || 0;
-            return new Date(tA) - new Date(tB);
-        });
-        selectedPlates = free.slice(0, q).map(c => c.plate);
-        render();
-    }
-
-    async function saveAndSend() {
-        const tid = document.getElementById('tid').value;
-        if(!tid || !selectedPlates.length) return alert("ເລືອກລົດກ່ອນ!");
-        const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
-        await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
-            action: "SAVE_TOUR", tourName: tid, location: document.getElementById('loc').value,
-            start: document.getElementById('start').value, end: document.getElementById('end').value,
-            selectedCars: selCars
-        })});
-        let msg = `🚛 *ແຈ້ງລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${document.getElementById('loc').value}\n----------\n`;
-        selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver})\n`);
-        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-        selectedPlates = []; setTimeout(sync, 1500);
-    }
-
     function toggleAdmin() {
         isAdminMode = !isAdminMode;
         document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none';
         render();
     }
 
-    window.onload = sync; setInterval(sync, 30000);
+    window.onload = sync; 
+    setInterval(sync, 30000);
 </script>
-</body>
-</html>
