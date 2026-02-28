@@ -3,303 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fleet Master Pro v24.2</title>
+    <title>Fleet Master v24.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2563eb;
-            --accent: #0ea5e9;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --bg: #0f172a;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --radius: 16px;
-        }
-
-        body {
-            font-family: 'Noto Sans Lao', sans-serif;
-            background: var(--bg);
-            background-image: radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.1) 0%, transparent 40%);
-            color: #fff; margin: 0; padding: 0; min-height: 100vh;
-        }
-
-        .container { max-width: 900px; margin: 0 auto; padding: 15px; padding-bottom: 120px; }
-
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
-            border-radius: var(--radius); border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .panel {
-            background: var(--card-bg); color: var(--text-main); padding: 20px;
-            border-radius: var(--radius); margin-bottom: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-        }
-
-        .grid-inputs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; }
-        
-        input, textarea {
-            width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px;
-            font-family: inherit; font-size: 14px; box-sizing: border-box; transition: 0.2s;
-        }
-
-        input:focus { outline: none; border-color: var(--accent); }
-
-        .btn {
-            border: none; padding: 12px; border-radius: 10px; font-weight: 700;
-            cursor: pointer; font-family: inherit; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-
-        .btn-fifo { background: var(--primary); color: white; width: 100%; margin-top: 10px; }
-        .btn-admin { background: transparent; border: 1px solid white; color: white; font-size: 12px; padding: 6px 12px; }
-
-        .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-
-        .car-card {
-            background: white; color: var(--text-main); padding: 15px;
-            border-radius: var(--radius); border-left: 8px solid #cbd5e1;
-            transition: 0.3s; position: relative; cursor: pointer;
-        }
-
-        .car-card.selected { border-left-width: 15px; transform: scale(1.03); box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
-        .car-card.busy { opacity: 0.7; background: #f8fafc; cursor: not-allowed; }
-
-        .plate-no { font-size: 1.5rem; font-weight: 800; color: #0f172a; line-height: 1; margin-bottom: 5px; }
-        .badge { position: absolute; top: 10px; right: 10px; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; color: white; text-transform: uppercase; }
-
-        #waBtn {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 500px; background: #25d366; color: white;
-            z-index: 1000; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4); font-size: 1.1rem; padding: 18px;
-        }
-
-        @media (max-width: 500px) { .grid-inputs { grid-template-columns: 1fr; } }
+        :root { --primary: #e11d48; --accent: #0ea5e9; --bg: #0f172a; --card: #ffffff; }
+        body { font-family: 'Noto Sans Lao', sans-serif; background: var(--bg); color: #fff; margin: 0; padding-bottom: 120px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 15px; }
+        .panel { background: var(--card); color: #1e293b; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
+        .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+        .car-card { background: white; color: #1e293b; padding: 15px; border-radius: 12px; border-left: 8px solid #cbd5e1; cursor: pointer; transition: 0.3s; position: relative; }
+        .car-card.selected { border-left-width: 15px; border-left-color: var(--accent); transform: scale(1.03); background: #f0f9ff; }
+        .car-card.busy { opacity: 0.7; background: #f1f5f9; cursor: not-allowed; }
+        .plate { font-size: 1.4rem; font-weight: 800; display: block; color: #0f172a; }
+        .badge { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; }
+        #waBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #22c55e; color: white; border: none; padding: 18px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(34,197,94,0.4); cursor: pointer; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <header>
-        <div style="font-size:1.3rem; font-weight:700;">🚛 Fleet Master <span style="color:var(--accent)">v24.2</span></div>
-        <button class="btn btn-admin" onclick="toggleAdmin()">⚙️ จัดการรถ</button>
+    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">v24.4</span></h2>
+        <button onclick="syncData()" style="background:none; border:1px solid #fff; color:#fff; padding:5px 10px; border-radius:8px; cursor:pointer;">🔄 ซิงค์ข้อมูล</button>
     </header>
 
-    <div id="admin" class="panel" style="display:none; background: #f1f5f9;">
-        <h3 style="margin-top:0">➕ เพิ่มรถใหม่</h3>
-        <div class="grid-inputs">
-            <input type="text" id="newP" placeholder="เลขทะเบียน (เช่น กก 1234)">
-            <input type="text" id="newD" placeholder="ชื่อคนขับ">
-            <input type="text" id="newPh" placeholder="เบอร์โทร">
-        </div>
-        <button class="btn btn-fifo" onclick="saveCarToSheet()">💾 บันทึกข้อมูลรถ</button>
-    </div>
-
     <div class="panel">
-        <label style="font-size:12px; font-weight:700; color:#64748b;">📋 วางข้อความจาก WHATSAPP</label>
-        <textarea id="rawWA" rows="3" placeholder="วางที่นี่เพื่อดึงข้อมูลอัตโนมัติ..." oninput="autoParse()"></textarea>
-
-        <div class="grid-inputs" style="margin-top:15px;">
-            <div><label style="font-size:11px">🆔 รหัสทัวร์</label><input type="text" id="tourID" oninput="render()"></div>
-            <div><label style="font-size:11px">🔢 จำนวนรถ</label><input type="number" id="qty" placeholder="กี่คัน?"></div>
+        <label style="font-size:12px; color:gray;">📋 วางข้อความ WhatsApp</label>
+        <textarea id="rawWA" rows="3" placeholder="วางที่นี่เพื่อดึงข้อมูล..." oninput="parseWA()"></textarea>
+        <div class="grid-inputs" style="margin-top:10px;">
+            <input type="text" id="tourID" placeholder="ID ทัวร์" oninput="render()">
+            <input type="number" id="qty" placeholder="จำนวนรถ">
         </div>
-        
         <div class="grid-inputs">
-            <div><label style="font-size:11px">📅 เวลารับ</label><input type="datetime-local" id="startT"></div>
-            <div><label style="font-size:11px">🏁 เวลาส่ง</label><input type="datetime-local" id="endT"></div>
+            <input type="datetime-local" id="start">
+            <input type="datetime-local" id="end">
         </div>
-
-        <div style="margin-top:5px;">
-            <label style="font-size:11px">📍 รายละเอียด/จำนวนคน</label>
-            <input type="text" id="detail">
-        </div>
-        
-        <button class="btn btn-fifo" onclick="fifoMatch()">⚖️ จับคู่รถอัตโนมัติ (คิวว่างนานสุด)</button>
+        <input type="text" id="loc" placeholder="รายละเอียด/จำนวนคน" style="margin-top:5px;">
+        <button onclick="fifoMatch()" style="margin-top:10px; width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">⚖️ จับคู่รถอัตโนมัติ (FIFO)</button>
     </div>
-
-    <div id="fleet" class="fleet-grid">
-        </div>
-
-    <button id="waBtn" class="btn" onclick="submitTour()">🚀 บันทึก & ส่ง WhatsApp</button>
+    <div id="fleetGrid" class="fleet-grid"></div>
 </div>
+<button id="waBtn" onclick="saveAndSend()">🚀 บันทึก & ส่ง WhatsApp</button>
 
 <script>
-    // --- API CONFIGURATION ---
-    const API = "https://script.google.com/macros/s/AKfycbzk6LMDIHTZldp7m8Nis0jTxrQL_uc1-TeM_4GdIKXPI6IMUVTmEldQUx36cdk-XfU/exec";
-    
-    let fleet = [];
-    let tourHistory = [];
-    let selectedPlates = [];
-    const VIBRANT_COLORS = ["#2563eb", "#d97706", "#7c3aed", "#db2777", "#059669", "#dc2626", "#0ea5e9"];
+    const API = "https://script.google.com/macros/s/AKfycbzblfVRA7Siy5iQZUgzidJP5pH-hjcqjS5wfXL7dXZ_olZWG46VU232zF_3xTx5pxBf/exec";
+    let fleet = []; let tourHistory = []; let selectedPlates = [];
 
-    // 1. Initial Data Sync
     async function syncData() {
         try {
             const res = await fetch(API);
             const data = await res.json();
-            fleet = data.fleet;
-            tourHistory = data.activeStatus;
+            fleet = data.fleet; tourHistory = data.activeStatus;
             render();
-        } catch (e) { console.error("Sync Error:", e); }
+        } catch(e) { console.error("Sync Error"); }
     }
 
-    // 2. Render Fleet UI
     function render() {
-        const container = document.getElementById('fleet');
-        container.innerHTML = '';
-        const currentTid = document.getElementById('tourID').value || "SEL";
-
+        const grid = document.getElementById('fleetGrid'); grid.innerHTML = '';
         fleet.forEach(car => {
-            const lastJob = tourHistory.filter(t => t.plate === car.plate).pop();
+            const lastJob = tourHistory.filter(t => t.plate == car.plate).pop();
             const isBusy = lastJob && lastJob.status === "Busy";
             const isSelected = selectedPlates.includes(car.plate);
             
-            let color = "#cbd5e1";
-            if(isBusy) color = getTourColor(lastJob.tourName);
-            else if(isSelected) color = getTourColor(currentTid);
-
             const card = document.createElement('div');
             card.className = `car-card ${isBusy ? 'busy' : ''} ${isSelected ? 'selected' : ''}`;
-            card.style.borderLeftColor = color;
-            if(isSelected) card.style.backgroundColor = color + '10';
-
             card.innerHTML = `
-                <div class="badge" style="background:${color}">${isBusy ? lastJob.tourName : (isSelected ? 'เลือกแล้ว' : 'ว่าง')}</div>
-                <div class="plate-no">${car.plate}</div>
-                <div style="font-weight:600; font-size:14px;">👤 ${car.driver}</div>
-                <div style="font-size:12px; color:#64748b;">📞 ${car.phone}</div>
-                ${isBusy ? `<button onclick="event.stopPropagation(); resetCar('${car.plate}')" style="margin-top:10px; width:100%; border:none; background:#fee2e2; color:#b91c1c; padding:4px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">🔄 Reset รถว่าง</button>` : ''}
+                <span class="badge" style="background:${isBusy ? '#ef4444' : (isSelected ? '#0ea5e9' : '#22c55e')}">${isBusy ? lastJob.tourName : (isSelected ? 'เลือกลงงาน' : 'ว่าง')}</span>
+                <span class="plate">${car.plate}</span>
+                <small>👤 ${car.driver}</small><br>
+                ${isBusy ? `<button onclick="event.stopPropagation(); resetCar('${car.plate}')" style="margin-top:8px; width:100%; border:none; background:#fee2e2; color:#b91c1c; padding:6px; border-radius:5px; cursor:pointer; font-size:10px; font-weight:bold;">🔄 Reset ให้ว่าง</button>` : ''}
             `;
-            
-            if(!isBusy) card.onclick = () => toggleSelect(car.plate);
-            container.appendChild(card);
+            if(!isBusy) card.onclick = () => {
+                if(selectedPlates.includes(car.plate)) selectedPlates = selectedPlates.filter(p => p !== car.plate);
+                else selectedPlates.push(car.plate);
+                render();
+            };
+            grid.appendChild(card);
         });
     }
 
-    // 3. WhatsApp Auto-Parser
-    function autoParse() {
-        const text = document.getElementById('rawWA').value;
-        
-        const idMatch = text.match(/([0-9]{4}[A-Z])/i);
-        if(idMatch) document.getElementById('tourID').value = idMatch[0];
-
-        const carMatch = text.match(/(\d+)\s*(ຄັນ|คัน|รถ)/);
-        if(carMatch) document.getElementById('qty').value = carMatch[1];
-
-        const paxMatch = text.match(/(\d+)\s*(ຄົນ|คน|pax)/);
-        if(paxMatch) document.getElementById('detail').value = "จำนวน " + paxMatch[0] + " คน";
-
-        // Date Picker Sync
-        const dateMatch = text.match(/(\d{1,2})[\/\-\.](\d{1,2})/);
-        if(dateMatch) {
-            const now = new Date();
-            const year = now.getFullYear();
-            const dateStr = `${year}-${dateMatch[2].padStart(2,'0')}-${dateMatch[1].padStart(2,'0')}T08:00`;
-            document.getElementById('startT').value = dateStr;
-            document.getElementById('endT').value = dateStr;
-        }
+    function parseWA() {
+        const t = document.getElementById('rawWA').value;
+        const idM = t.match(/([0-9]{4}[A-Z])/i); if(idM) document.getElementById('tourID').value = idM[0];
+        const qM = t.match(/(\d+)\s*(ຄັນ|คัน)/); if(qM) document.getElementById('qty').value = qM[1];
         render();
     }
 
-    // 4. FIFO Matching Logic
     function fifoMatch() {
         const q = parseInt(document.getElementById('qty').value) || 0;
-        if(q <= 0) return alert("กรุณาใส่จำนวนรถ!");
-
-        const busyPlates = tourHistory.filter(t => t.status === "Busy").map(t => t.plate);
-        let freeCars = fleet.filter(c => !busyPlates.includes(c.plate));
-
-        // Sort by Last Job Completion (FIFO)
-        freeCars.sort((a, b) => {
-            const timeA = tourHistory.filter(t => t.plate === a.plate).pop()?.timestamp || 0;
-            const timeB = tourHistory.filter(t => t.plate === b.plate).pop()?.timestamp || 0;
-            return new Date(timeA) - new Date(timeB);
+        const busyP = tourHistory.filter(t => t.status === "Busy").map(t => t.plate);
+        let free = fleet.filter(c => !busyP.includes(c.plate));
+        free.sort((a,b) => {
+            const tA = tourHistory.filter(t => t.plate == a.plate).pop()?.timestamp || 0;
+            const tB = tourHistory.filter(t => t.plate == b.plate).pop()?.timestamp || 0;
+            return new Date(tA) - new Date(tB);
         });
-
-        selectedPlates = freeCars.slice(0, q).map(c => c.plate);
+        selectedPlates = free.slice(0, q).map(c => c.plate);
         render();
     }
 
-    // 5. Submit to Google Sheets & WhatsApp
-    async function submitTour() {
+    async function saveAndSend() {
         const tid = document.getElementById('tourID').value;
-        const det = document.getElementById('detail').value;
-        const s = document.getElementById('startT').value;
-        const e = document.getElementById('endT').value;
-
-        if(!tid || selectedPlates.length === 0) return alert("ข้อมูลไม่ครบ!");
-
-        const btn = document.getElementById('waBtn');
-        btn.innerText = "⏳ กำลังบันทึกข้อมูล...";
-        btn.disabled = true;
-
-        const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
+        if(!tid || !selectedPlates.length) return alert("กรุณาใส่รหัสทัวร์และเลือกรถ!");
+        const btn = document.getElementById('waBtn'); btn.innerText = "⏳ กำลังบันทึก..."; btn.disabled = true;
 
         try {
-            await fetch(API, {
-                method: 'POST',
+            const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
+            await fetch(API, { 
+                method: 'POST', 
+                mode: 'no-cors', // สำคัญมากเพื่อเลี่ยงปัญหา CORS ใน Apps Script
                 body: JSON.stringify({
-                    action: "SAVE_TOUR",
-                    tourName: tid,
-                    location: det,
-                    start: s,
-                    end: e,
+                    action: "SAVE_TOUR", tourName: tid, location: document.getElementById('loc').value,
+                    start: document.getElementById('start').value, end: document.getElementById('end').value,
                     selectedCars: selCars
                 })
             });
-
-            // WA Message Generator
-            let msg = `🚛 *แผงจัดรถทัวร์: ${tid}*\n📍 *รายละเอียด:* ${det}\n📅 *เริ่ม:* ${s.replace('T',' ')}\n🏁 *ส่ง:* ${e.replace('T',' ')}\n----------\n`;
-            selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver})\n`);
             
+            let msg = `🚛 *แผงจัดรถทัวร์: ${tid}*\n📍 *รายละเอียด:* ${document.getElementById('loc').value}\n----------\n`;
+            selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver})\n`);
             window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
             
-            selectedPlates = [];
-            syncData();
-        } catch (err) { alert("Error: " + err); }
-        finally { btn.innerText = "🚀 บันทึก & ส่ง WhatsApp"; btn.disabled = false; }
+            selectedPlates = []; setTimeout(syncData, 2000);
+        } catch(e) { alert("เกิดข้อผิดพลาดในการบันทึก"); }
+        finally { btn.innerText = "🚀 ບັນທຶກ & ສົ່ງ WhatsApp"; btn.disabled = false; }
     }
 
-    // --- Helper Functions ---
-    function toggleSelect(p) {
-        const i = selectedPlates.indexOf(p);
-        if(i > -1) selectedPlates.splice(i, 1); else selectedPlates.push(p);
-        render();
-    }
-
-    async function resetCar(plate) {
-        if(confirm(`รีเซ็ตให้รถ ${plate} ว่างงาน?`)) {
-            await fetch(API, { method: 'POST', body: JSON.stringify({ action: "RESET_SINGLE", plate: plate }) });
-            syncData();
+    async function resetCar(p) {
+        if(confirm(`รีเซ็ตรถ ${p} ให้ว่าง?`)) {
+            await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "RESET_SINGLE", plate: p }) });
+            setTimeout(syncData, 1500);
         }
     }
 
-    async function saveCarToSheet() {
-        const p = document.getElementById('newP').value;
-        const d = document.getElementById('newD').value;
-        const ph = document.getElementById('newPh').value;
-        if(!p || !d) return alert("กรุณาใส่ทะเบียนและคนขับ");
-        
-        await fetch(API, { method: 'POST', body: JSON.stringify({ action: "ADD_CAR", plate: p, driver: d, phone: ph }) });
-        document.getElementById('newP').value = ''; document.getElementById('newD').value = '';
-        toggleAdmin();
-        syncData();
-    }
-
-    function getTourColor(id) {
-        let hash = 0;
-        for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-        return VIBRANT_COLORS[Math.abs(hash) % VIBRANT_COLORS.length];
-    }
-
-    function toggleAdmin() {
-        const el = document.getElementById('admin');
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
-    }
-
-    window.onload = syncData;
-    setInterval(syncData, 10000); // Auto-sync every 10 seconds
+    window.onload = syncData; setInterval(syncData, 30000);
 </script>
 </body>
 </html>
