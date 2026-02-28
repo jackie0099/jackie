@@ -120,27 +120,51 @@
         setTimeout(sync, 1500);
     }
 
-    // บันทึกและส่ง WhatsApp (พร้อมเบอร์โทรคนขับ)
-    async function saveAndSend() {
-        const tid = document.getElementById('tid').value;
-        const loc = document.getElementById('loc').value;
-        if(!tid || !selectedPlates.length) return alert("ເລືອກລົດກ່ອນ!");
+    // --- ค้นหาฟังก์ชัน saveAndSend ในไฟล์ index.html แล้วเปลี่ยนเป็นอันนี้ ---
+async function saveAndSend() {
+    const tid = document.getElementById('tid').value;
+    const loc = document.getElementById('loc').value;
+    const sTime = document.getElementById('start').value;
+    const eTime = document.getElementById('end').value;
+
+    if(!tid || !selectedPlates.length) return alert("ກະລຸນາເລືອກລົດ ແລະ ໃສ່ລະຫັດທົວ!");
+    
+    const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
+    const btn = document.getElementById('waBtn');
+    btn.innerText = "⏳ ກຳລັງບັນທຶກ..."; btn.disabled = true;
+
+    try {
+        // ส่งข้อมูลไปบันทึก (รวมเบอร์โทรคนขับ)
+        await fetch(API, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({
+                action: "SAVE_TOUR", 
+                tourName: tid, 
+                location: loc,
+                start: sTime, 
+                end: eTime,
+                selectedCars: selCars 
+            })
+        });
         
-        const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
-        await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
-            action: "SAVE_TOUR", tourName: tid, location: loc,
-            start: document.getElementById('start').value, 
-            end: document.getElementById('end').value,
-            selectedCars: selCars
-        })});
-        
+        // ข้อความ WhatsApp พร้อมเบอร์โทร
         let msg = `🚛 *ແຈ້ງລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${loc}\n----------\n`;
-        selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver}) 📞 ${c.phone || ''}\n`);
+        selCars.forEach((c, i) => {
+            msg += `${i+1}. ✅ *${c.plate}* (${c.driver}) 📞 ${c.phone || ''}\n`;
+        });
         
         window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        
         selectedPlates = []; 
-        setTimeout(sync, 1500);
+        setTimeout(sync, 1500); 
+    } catch(e) { 
+        alert("บันทึกผิดพลาด! กรุณาตรวจสอบการ Deploy"); 
+    } finally { 
+        btn.innerText = "🚀 ບັນທຶກ & ສົ່ງ WhatsApp"; 
+        btn.disabled = false; 
     }
+}
 
     // ฟังก์ชันช่วยดึงข้อมูล WhatsApp (Smart Parser)
     function parseWA() {
