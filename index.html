@@ -9,23 +9,18 @@
         :root { --primary: #e11d48; --accent: #0ea5e9; --bg: #0f172a; --card: #ffffff; --text: #1e293b; }
         body { font-family: 'Noto Sans Lao', sans-serif; background: var(--bg); color: #fff; margin: 0; padding-bottom: 120px; }
         .container { max-width: 900px; margin: 0 auto; padding: 15px; }
-        
         .panel { background: var(--card); color: var(--text); padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
-        
         .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
         .car-card { background: white; color: var(--text); padding: 15px; border-radius: 12px; border-left: 8px solid #cbd5e1; position: relative; transition: 0.3s; cursor: pointer; }
         .car-card.selected { border-left-width: 15px; border-left-color: var(--accent); background: #f0f9ff; transform: translateY(-3px); }
         .car-card.busy { opacity: 0.7; background: #f1f5f9; cursor: not-allowed; }
-        
         .plate { font-size: 1.4rem; font-weight: 800; display: block; color: #0f172a; }
         .badge { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; }
-        
         .btn-action { width: 100%; border: none; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         .btn-reset { background: #dcfce7; color: #166534; }
         .btn-delete { background: #fee2e2; color: #b91c1c; }
-        
         #waBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #22c55e; color: white; border: none; padding: 18px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(34,197,94,0.4); cursor: pointer; z-index: 1000; }
         .admin-btn { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
@@ -39,7 +34,7 @@
     </header>
 
     <div id="adminPanel" class="panel" style="display:none; border: 2px dashed var(--accent);">
-        <h3 style="margin-top:0;">➕ ເພີ່ມລົດໃໝ່</h3>
+        <h3 style="margin-top:0;">➕ ເພີ່ມລົດໃໝ่</h3>
         <div class="grid-inputs">
             <input type="text" id="addP" placeholder="ທະບຽນລົດ">
             <input type="text" id="addD" placeholder="ຊື່ຄົນຂັບ">
@@ -90,10 +85,13 @@
             
             const card = document.createElement('div');
             card.className = `car-card ${isBusy ? 'busy' : ''} ${isSelected ? 'selected' : ''}`;
+            
+            // เพิ่มบรรทัด 📞 ${car.phone} เพื่อแสดงเบอร์โทร
             card.innerHTML = `
                 <span class="badge" style="background:${isBusy ? '#ef4444' : (isSelected ? '#0ea5e9' : '#22c55e')}">${isBusy ? lastJob.tourName : 'ຫວ່າງ'}</span>
                 <span class="plate">${car.plate}</span>
-                <small>👤 ${car.driver}</small>
+                <div style="font-weight:600; font-size:13px; margin-top:5px;">👤 ${car.driver}</div>
+                <div style="color:var(--accent); font-size:12px; margin-top:2px;">📞 ${car.phone || 'ບໍ່ມີເບີ'}</div>
                 ${isBusy ? `<button onclick="event.stopPropagation(); manageCar('RESET_SINGLE', '${car.plate}')" class="btn-action btn-reset">🔄 Reset ຫວ່າງ</button>` : ''}
                 ${isAdminMode ? `<button onclick="event.stopPropagation(); manageCar('DELETE_CAR', '${car.plate}')" class="btn-action btn-delete">❌ ລົບລົດອອກ</button>` : ''}
             `;
