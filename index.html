@@ -3,58 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fleet Master v24.4</title>
+    <title>Fleet Master v24.6 - Full Control</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #e11d48; --accent: #0ea5e9; --bg: #0f172a; --card: #ffffff; }
+        :root { --primary: #e11d48; --accent: #0ea5e9; --bg: #0f172a; --card: #ffffff; --text: #1e293b; }
         body { font-family: 'Noto Sans Lao', sans-serif; background: var(--bg); color: #fff; margin: 0; padding-bottom: 120px; }
         .container { max-width: 900px; margin: 0 auto; padding: 15px; }
-        .panel { background: var(--card); color: #1e293b; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        
+        .panel { background: var(--card); color: var(--text); padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
+        
         .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-        .car-card { background: white; color: #1e293b; padding: 15px; border-radius: 12px; border-left: 8px solid #cbd5e1; cursor: pointer; transition: 0.3s; position: relative; }
-        .car-card.selected { border-left-width: 15px; border-left-color: var(--accent); transform: scale(1.03); background: #f0f9ff; }
+        .car-card { background: white; color: var(--text); padding: 15px; border-radius: 12px; border-left: 8px solid #cbd5e1; position: relative; transition: 0.3s; cursor: pointer; }
+        .car-card.selected { border-left-width: 15px; border-left-color: var(--accent); background: #f0f9ff; transform: translateY(-3px); }
         .car-card.busy { opacity: 0.7; background: #f1f5f9; cursor: not-allowed; }
+        
         .plate { font-size: 1.4rem; font-weight: 800; display: block; color: #0f172a; }
         .badge { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; }
-        #waBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #22c55e; color: white; border: none; padding: 18px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(34,197,94,0.4); cursor: pointer; }
+        
+        .btn-action { width: 100%; border: none; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .btn-reset { background: #dcfce7; color: #166534; }
+        .btn-delete { background: #fee2e2; color: #b91c1c; }
+        
+        #waBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #22c55e; color: white; border: none; padding: 18px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(34,197,94,0.4); cursor: pointer; z-index: 1000; }
+        .admin-btn { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
+
 <div class="container">
     <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">v24.4</span></h2>
-        <button onclick="syncData()" style="background:none; border:1px solid #fff; color:#fff; padding:5px 10px; border-radius:8px; cursor:pointer;">🔄 ซิงค์ข้อมูล</button>
+        <h2 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">v24.6</span></h2>
+        <button onclick="toggleAdmin()" class="admin-btn">⚙️ ຈັດການລົດ</button>
     </header>
 
+    <div id="adminPanel" class="panel" style="display:none; border: 2px dashed var(--accent);">
+        <h3 style="margin-top:0;">➕ ເພີ່ມລົດໃໝ່</h3>
+        <div class="grid-inputs">
+            <input type="text" id="addP" placeholder="ທະບຽນລົດ">
+            <input type="text" id="addD" placeholder="ຊື່ຄົນຂັບ">
+            <input type="text" id="addPh" placeholder="ເບີໂທ">
+        </div>
+        <button onclick="manageCar('ADD_CAR')" style="width:100%; padding:12px; background:#0f172a; color:white; border-radius:10px; border:none; cursor:pointer; font-weight:bold;">💾 ບັນທຶກລົດລົງ Sheet</button>
+    </div>
+
     <div class="panel">
-        <label style="font-size:12px; color:gray;">📋 วางข้อความ WhatsApp</label>
-        <textarea id="rawWA" rows="3" placeholder="วางที่นี่เพื่อดึงข้อมูล..." oninput="parseWA()"></textarea>
+        <textarea id="rawWA" rows="2" placeholder="ວາງຂໍ້ຄວາມ WhatsApp ບ່ອນນີ້..." oninput="parseWA()"></textarea>
         <div class="grid-inputs" style="margin-top:10px;">
-            <input type="text" id="tourID" placeholder="ID ทัวร์" oninput="render()">
-            <input type="number" id="qty" placeholder="จำนวนรถ">
+            <input type="text" id="tid" placeholder="ID ທົວ">
+            <input type="number" id="qty" placeholder="ຈຳນວນລົດ">
         </div>
         <div class="grid-inputs">
             <input type="datetime-local" id="start">
             <input type="datetime-local" id="end">
         </div>
-        <input type="text" id="loc" placeholder="รายละเอียด/จำนวนคน" style="margin-top:5px;">
-        <button onclick="fifoMatch()" style="margin-top:10px; width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">⚖️ จับคู่รถอัตโนมัติ (FIFO)</button>
+        <input type="text" id="loc" placeholder="ລາຍລະອຽດ/ຈຳນວນຄົນ" style="margin-top:5px;">
+        <button onclick="fifoMatch()" style="margin-top:10px; width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">⚖️ ເລືອກລົດອັດຕະໂນມັດ (FIFO)</button>
     </div>
+
     <div id="fleetGrid" class="fleet-grid"></div>
 </div>
-<button id="waBtn" onclick="saveAndSend()">🚀 บันทึก & ส่ง WhatsApp</button>
+
+<button id="waBtn" onclick="saveAndSend()">🚀 ບັນທຶກ & ສົ່ງ WhatsApp</button>
 
 <script>
-    const API = "https://script.google.com/macros/s/AKfycbzblfVRA7Siy5iQZUgzidJP5pH-hjcqjS5wfXL7dXZ_olZWG46VU232zF_3xTx5pxBf/exec";
-    let fleet = []; let tourHistory = []; let selectedPlates = [];
+    const API = "https://script.google.com/macros/s/AKfycbxO6J7Zp5lpK7Y6y0jYWvYrKP5Ygx_s9BXDYaLWIgbCrQzcsDKeIftldrYzX2tj3evF/exec";
+    let fleet = []; let history = []; let selectedPlates = [];
+    let isAdminMode = false;
 
-    async function syncData() {
+    async function sync() {
         try {
             const res = await fetch(API);
             const data = await res.json();
-            fleet = data.fleet; tourHistory = data.activeStatus;
+            fleet = data.fleet; history = data.activeStatus;
             render();
         } catch(e) { console.error("Sync Error"); }
     }
@@ -62,41 +84,63 @@
     function render() {
         const grid = document.getElementById('fleetGrid'); grid.innerHTML = '';
         fleet.forEach(car => {
-            const lastJob = tourHistory.filter(t => t.plate == car.plate).pop();
+            const lastJob = history.filter(t => t.plate == car.plate).pop();
             const isBusy = lastJob && lastJob.status === "Busy";
             const isSelected = selectedPlates.includes(car.plate);
             
             const card = document.createElement('div');
             card.className = `car-card ${isBusy ? 'busy' : ''} ${isSelected ? 'selected' : ''}`;
             card.innerHTML = `
-                <span class="badge" style="background:${isBusy ? '#ef4444' : (isSelected ? '#0ea5e9' : '#22c55e')}">${isBusy ? lastJob.tourName : (isSelected ? 'เลือกลงงาน' : 'ว่าง')}</span>
+                <span class="badge" style="background:${isBusy ? '#ef4444' : (isSelected ? '#0ea5e9' : '#22c55e')}">${isBusy ? lastJob.tourName : 'ຫວ່າງ'}</span>
                 <span class="plate">${car.plate}</span>
-                <small>👤 ${car.driver}</small><br>
-                ${isBusy ? `<button onclick="event.stopPropagation(); resetCar('${car.plate}')" style="margin-top:8px; width:100%; border:none; background:#fee2e2; color:#b91c1c; padding:6px; border-radius:5px; cursor:pointer; font-size:10px; font-weight:bold;">🔄 Reset ให้ว่าง</button>` : ''}
+                <small>👤 ${car.driver}</small>
+                ${isBusy ? `<button onclick="event.stopPropagation(); manageCar('RESET_SINGLE', '${car.plate}')" class="btn-action btn-reset">🔄 Reset ຫວ່າງ</button>` : ''}
+                ${isAdminMode ? `<button onclick="event.stopPropagation(); manageCar('DELETE_CAR', '${car.plate}')" class="btn-action btn-delete">❌ ລົບລົດອອກ</button>` : ''}
             `;
-            if(!isBusy) card.onclick = () => {
-                if(selectedPlates.includes(car.plate)) selectedPlates = selectedPlates.filter(p => p !== car.plate);
-                else selectedPlates.push(car.plate);
-                render();
-            };
+            if(!isBusy && !isAdminMode) card.onclick = () => toggle(car.plate);
             grid.appendChild(card);
         });
     }
 
+    async function manageCar(action, plate = '') {
+        let payload = { action: action };
+        if(action === 'ADD_CAR') {
+            payload.plate = document.getElementById('addP').value;
+            payload.driver = document.getElementById('addD').value;
+            payload.phone = document.getElementById('addPh').value;
+            if(!payload.plate || !payload.driver) return alert("ປ້ອນຂໍ້ມູນໃຫ້ຄົບ!");
+        } else {
+            payload.plate = plate;
+            if(action === 'DELETE_CAR' && !confirm(`ຕ້ອງການລົບລົດ ${plate}?`)) return;
+        }
+
+        try {
+            await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            if(action === 'ADD_CAR') { document.getElementById('addP').value=''; document.getElementById('addD').value=''; document.getElementById('addPh').value=''; }
+            setTimeout(sync, 1500);
+        } catch(e) { alert("Error!"); }
+    }
+
+    function toggle(p) {
+        if(selectedPlates.includes(p)) selectedPlates = selectedPlates.filter(i => i !== p);
+        else selectedPlates.push(p);
+        render();
+    }
+
     function parseWA() {
         const t = document.getElementById('rawWA').value;
-        const idM = t.match(/([0-9]{4}[A-Z])/i); if(idM) document.getElementById('tourID').value = idM[0];
+        const idM = t.match(/([0-9]{4}[A-Z])/i); if(idM) document.getElementById('tid').value = idM[0];
         const qM = t.match(/(\d+)\s*(ຄັນ|คัน)/); if(qM) document.getElementById('qty').value = qM[1];
         render();
     }
 
     function fifoMatch() {
         const q = parseInt(document.getElementById('qty').value) || 0;
-        const busyP = tourHistory.filter(t => t.status === "Busy").map(t => t.plate);
+        const busyP = history.filter(t => t.status === "Busy").map(t => t.plate);
         let free = fleet.filter(c => !busyP.includes(c.plate));
         free.sort((a,b) => {
-            const tA = tourHistory.filter(t => t.plate == a.plate).pop()?.timestamp || 0;
-            const tB = tourHistory.filter(t => t.plate == b.plate).pop()?.timestamp || 0;
+            const tA = history.filter(t => t.plate == a.plate).pop()?.timestamp || 0;
+            const tB = history.filter(t => t.plate == b.plate).pop()?.timestamp || 0;
             return new Date(tA) - new Date(tB);
         });
         selectedPlates = free.slice(0, q).map(c => c.plate);
@@ -104,39 +148,27 @@
     }
 
     async function saveAndSend() {
-        const tid = document.getElementById('tourID').value;
-        if(!tid || !selectedPlates.length) return alert("กรุณาใส่รหัสทัวร์และเลือกรถ!");
-        const btn = document.getElementById('waBtn'); btn.innerText = "⏳ กำลังบันทึก..."; btn.disabled = true;
-
-        try {
-            const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
-            await fetch(API, { 
-                method: 'POST', 
-                mode: 'no-cors', // สำคัญมากเพื่อเลี่ยงปัญหา CORS ใน Apps Script
-                body: JSON.stringify({
-                    action: "SAVE_TOUR", tourName: tid, location: document.getElementById('loc').value,
-                    start: document.getElementById('start').value, end: document.getElementById('end').value,
-                    selectedCars: selCars
-                })
-            });
-            
-            let msg = `🚛 *แผงจัดรถทัวร์: ${tid}*\n📍 *รายละเอียด:* ${document.getElementById('loc').value}\n----------\n`;
-            selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver})\n`);
-            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-            
-            selectedPlates = []; setTimeout(syncData, 2000);
-        } catch(e) { alert("เกิดข้อผิดพลาดในการบันทึก"); }
-        finally { btn.innerText = "🚀 ບັນທຶກ & ສົ່ງ WhatsApp"; btn.disabled = false; }
+        const tid = document.getElementById('tid').value;
+        if(!tid || !selectedPlates.length) return alert("ເລືອກລົດກ່ອນ!");
+        const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
+        await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
+            action: "SAVE_TOUR", tourName: tid, location: document.getElementById('loc').value,
+            start: document.getElementById('start').value, end: document.getElementById('end').value,
+            selectedCars: selCars
+        })});
+        let msg = `🚛 *ແຈ້ງລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${document.getElementById('loc').value}\n----------\n`;
+        selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver})\n`);
+        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        selectedPlates = []; setTimeout(sync, 1500);
     }
 
-    async function resetCar(p) {
-        if(confirm(`รีเซ็ตรถ ${p} ให้ว่าง?`)) {
-            await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "RESET_SINGLE", plate: p }) });
-            setTimeout(syncData, 1500);
-        }
+    function toggleAdmin() {
+        isAdminMode = !isAdminMode;
+        document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none';
+        render();
     }
 
-    window.onload = syncData; setInterval(syncData, 30000);
+    window.onload = sync; setInterval(sync, 30000);
 </script>
 </body>
 </html>
