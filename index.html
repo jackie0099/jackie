@@ -191,32 +191,38 @@
         render();
     }
 
-    // 💾 5. บันทึกและส่ง WhatsApp
-    async function saveAndSend() {
-        const tid = document.getElementById('tid').value;
-        const loc = document.getElementById('loc').value;
-        if(!tid || !selectedPlates.length) return alert("ກະລຸນາເລືອກລົດ!");
-        
-        const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
-        const btn = document.getElementById('waBtn');
-        btn.innerText = "⏳ ກຳລັງບັນທຶກ..."; btn.disabled = true;
+// --- ຫາຟັງຊັນ saveAndSend() ໃນໄຟລ໌ຂອງທ່ານ ແລ້ວປ່ຽນເປັນອັນນີ້ ---
+async function saveAndSend() {
+    const tid = document.getElementById('tid').value;
+    const loc = document.getElementById('loc').value;
+    if(!tid || !selectedPlates.length) return alert("ກະລຸນາເລືອກລົດ!");
+    
+    const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
+    const btn = document.getElementById('waBtn');
+    btn.innerText = "⏳ ກຳລັງບັນທຶກ..."; btn.disabled = true;
 
-        try {
-            await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
-                action: "SAVE_TOUR", tourName: tid, location: loc,
-                start: document.getElementById('start').value, 
-                end: document.getElementById('end').value,
-                selectedCars: selCars
-            })});
-            
-            let msg = `🚛 *ແຈ້ງລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${loc}\n----------\n`;
-            selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver})\n`);
-            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-            
-            selectedPlates = []; setTimeout(sync, 1500);
-        } catch(e) { alert("Error!"); }
-        finally { btn.innerText = "🚀 ບັນທຶກ & ສົ່ງ WhatsApp"; btn.disabled = false; }
-    }
+    try {
+        // ສົ່ງຂໍ້ມູນໄປ Google Sheet
+        await fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
+            action: "SAVE_TOUR", tourName: tid, location: loc,
+            start: document.getElementById('start').value, 
+            end: document.getElementById('end').value,
+            selectedCars: selCars
+        })});
+        
+        // --- ປັບປຸງຂໍ້ຄວາມ WhatsApp ໃຫ້ມີເບີໂທ (📞) ---
+        let msg = `🚛 *ແຈ້ງລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${loc}\n----------\n`;
+        selCars.forEach((c, i) => {
+            msg += `${i+1}. ✅ *${c.plate}* (${c.driver}) 📞 ${c.phone || '---'}\n`;
+        });
+        
+        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        
+        selectedPlates = []; 
+        setTimeout(sync, 1500); // ໂຫຼດຂໍ້ມູນໃໝ່ເພື່ອເບິ່ງສີ ແລະ ສະຖານະ
+    } catch(e) { alert("Error!"); }
+    finally { btn.innerText = "🚀 ບັນທຶກ & ສົ່ງ WhatsApp"; btn.disabled = false; }
+}
 
     // ⚙️ 6. จัดการข้อมูลรถ (Add/Delete/Reset)
     async function manageCar(action, plate = '') {
