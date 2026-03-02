@@ -194,7 +194,7 @@
     function toggle(p) { const i = selectedPlates.indexOf(p); if(i > -1) selectedPlates.splice(i, 1); else selectedPlates.push(p); render(); }
     function toggleAdmin() { isAdminMode = !isAdminMode; document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none'; render(); }
 
-    window.onload = syncData; setInterval(syncData, 45000);
+    window.onload = syncData; setInterval(syncData, 10000);
 </script>
 </body>
 </html>
