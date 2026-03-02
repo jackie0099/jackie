@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fleet Master v24.6 - Full Control</title>
+    <title>Fleet Master v25.6 - Enterprise Sync</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #e11d48; --accent: #0ea5e9; --bg: #0f172a; --card: #ffffff; --text: #1e293b; }
@@ -18,9 +18,7 @@
         .car-card.busy { opacity: 0.7; background: #f1f5f9; cursor: not-allowed; }
         .plate { font-size: 1.4rem; font-weight: 800; display: block; color: #0f172a; }
         .badge { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; }
-        .btn-action { width: 100%; border: none; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .btn-reset { background: #dcfce7; color: #166534; }
-        .btn-delete { background: #fee2e2; color: #b91c1c; }
+        .btn-action { width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         #waBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #22c55e; color: white; border: none; padding: 18px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(34,197,94,0.4); cursor: pointer; z-index: 1000; }
         .admin-btn { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
@@ -29,12 +27,12 @@
 
 <div class="container">
     <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">v24.6</span></h2>
+        <h2 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">v25.6</span></h2>
         <button onclick="toggleAdmin()" class="admin-btn">⚙️ ຈັດການລົດ</button>
     </header>
 
     <div id="adminPanel" class="panel" style="display:none; border: 2px dashed var(--accent);">
-        <h3 style="margin-top:0;">➕ ເພີ່ມລົດໃໝ่</h3>
+        <h3 style="margin-top:0;">➕ ເພີ່ມລົດໃໝ່</h3>
         <div class="grid-inputs">
             <input type="text" id="addP" placeholder="ທະບຽນລົດ">
             <input type="text" id="addD" placeholder="ຊື່ຄົນຂັບ">
@@ -44,9 +42,9 @@
     </div>
 
     <div class="panel">
-        <textarea id="rawWA" rows="2" placeholder="ວາງຂໍ້ຄວາມ WhatsApp ບ່ອນນີ້..." oninput="parseWA()"></textarea>
+        <textarea id="rawWA" rows="3" placeholder="ວາງຂໍ້ຄວາມ WhatsApp ບ່ອນນີ້..." oninput="parseWA()"></textarea>
         <div class="grid-inputs" style="margin-top:10px;">
-            <input type="text" id="tid" placeholder="ID ທົວ">
+            <input type="text" id="tid" placeholder="ID ທົວ" oninput="render()">
             <input type="number" id="qty" placeholder="ຈຳນວນລົດ">
         </div>
         <div class="grid-inputs">
@@ -54,7 +52,7 @@
             <input type="datetime-local" id="end">
         </div>
         <input type="text" id="loc" placeholder="ລາຍລະອຽດ/ຈຳນວນຄົນ" style="margin-top:5px;">
-        <button onclick="fifoMatch()" style="margin-top:10px; width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">⚖️ ເລືອກລົດອັດຕະໂນມັດ (FIFO)</button>
+        <button onclick="autoMatch()" class="btn-action" style="background:var(--primary); color:white;">⚖️ ເລືອກລົດອັດຕະໂນມັດ (FIFO)</button>
     </div>
 
     <div id="fleetGrid" class="fleet-grid"></div>
@@ -63,68 +61,56 @@
 <button id="waBtn" onclick="saveAndSend()">🚀 ບັນທຶກ & ສົ່ງ WhatsApp</button>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxe6LqSFNa6NlHX5ydLsocbOYqEoa7CIr9J_8z8I-CQLOovNXEXu-8PvXPue1kmYLej/exec";
-    const PALETTE = ["#e1f5fe", "#f3e5f5", "#e8f5e9", "#fff3e0", "#efebe9", "#fce4ec", "#e0f2f1", "#f9fbe7"];
+    // 🔗 URL และตัวแปรมาตรฐาน
+    const API_URL = "https://script.google.com/macros/s/AKfycbyToPcc7W7yUcRi7TTni9_xI5w8XnvrLBUYLJkqecUX_SO2BFx1uYpB0Ogg2sHyw2M2/exec";
+    const PALETTE = ["#e1f5fe", "#f3e5f5", "#e8f5e9", "#fff3e0", "#efebe9", "#fce4ec", "#e0f2f1"];
 
-    let fleet = []; // รายชื่อรถจาก Sheet Data
-    let cloudData = []; // ข้อมูลงานจาก Sheet Tours
+    let fleet = [];
+    let cloudData = [];
     let selectedPlates = [];
     let isAdminMode = false;
 
-    // 🔄 แก้ไขการซิงค์ข้อมูลให้แยกส่วนชัดเจน
+    // 1. ซิงค์ข้อมูลจาก Cloud
     async function syncData() {
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
-            fleet = data.fleet || []; // เก็บรายชื่อรถ
-            cloudData = data.activeStatus || []; // เก็บประวัติงาน
+            fleet = data.fleet || [];
+            cloudData = data.activeStatus || [];
             render();
         } catch (e) { console.log("Sync Error:", e); render(); }
     }
 
-    // 🎨 ฟังก์ชันคำนวณสีให้ตรงกันทั้งหน้าเว็บและ Sheet
-    function getTourColor(id) {
-        if(!id || id === "ຫວ່າງ") return "#cbd5e1";
-        let hash = 0;
-        for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-        return PALETTE[Math.abs(hash) % PALETTE.length];
-    }
-
-    // ⚖️ ฟังก์ชันจับคู่รถอัตโนมัติ (FIFO) - แก้ไขให้ตรวจสอบสถานะถูกต้อง
+    // 2. ฟังก์ชันจับคู่รถ (FIFO)
     function autoMatch() {
         const q = parseInt(document.getElementById('qty').value) || 0;
         if (q <= 0) return alert("ກະລຸນາໃສ່ຈຳນວນລົດ!");
 
-        // หารถที่สถานะปัจจุบันเป็น "Busy"
         const busyPlates = new Set(cloudData.filter(d => d.status === "Busy").map(d => d.plate));
-        
-        // กรองรถที่ว่างอยู่
         let freeCars = fleet.filter(c => !busyPlates.has(c.plate));
 
-        // เรียงลำดับตามเวลาที่ว่างงานนานที่สุด (FIFO)
         freeCars.sort((a, b) => {
-            const lastA = cloudData.filter(d => d.plate === a.plate).pop();
-            const lastB = cloudData.filter(d => d.plate === b.plate).pop();
-            const timeA = lastA ? new Date(lastA.timestamp) : new Date(0);
-            const timeB = lastB ? new Date(lastB.timestamp) : new Date(0);
-            return timeA - timeB;
+            const hA = cloudData.filter(d => d.plate === a.plate);
+            const hB = cloudData.filter(d => d.plate === b.plate);
+            const tA = hA.length ? new Date(Math.max(...hA.map(x => new Date(x.timestamp)))) : new Date(0);
+            const tB = hB.length ? new Date(Math.max(...hB.map(x => new Date(x.timestamp)))) : new Date(0);
+            return tA - tB;
         });
 
         selectedPlates = freeCars.slice(0, q).map(c => c.plate);
         render();
     }
 
+    // 3. แสดงผลการ์ดรถ (แก้ไข ID fleetGrid ให้ถูกต้อง)
     function render() {
-        const container = document.getElementById('fleet');
-        const tid = document.getElementById('tourID').value || "SEL";
+        const container = document.getElementById('fleetGrid');
+        const tourIdValue = document.getElementById('tid').value || "SEL";
         container.innerHTML = '';
 
         fleet.forEach(car => {
             const busyJob = cloudData.find(c => c.plate === car.plate && c.status === "Busy");
             const isSelected = selectedPlates.includes(car.plate);
-            
-            // ใช้สีทัวร์เดียวกันทั้งหน้าเว็บ
-            let tourColor = busyJob ? getTourColor(busyJob.tourName) : (isSelected ? getTourColor(tid) : "#cbd5e1");
+            let tourColor = busyJob ? getTourColor(busyJob.tourName) : (isSelected ? getTourColor(tourIdValue) : "#cbd5e1");
             
             const card = document.createElement('div');
             card.className = `car-card ${isSelected ? 'selected' : ''} ${busyJob ? 'busy' : ''}`;
@@ -132,12 +118,13 @@
             if(isSelected || busyJob) card.style.backgroundColor = tourColor + "44"; 
 
             card.innerHTML = `
-                <div class="badge" style="background:${tourColor}">${busyJob ? busyJob.tourName : (isSelected ? 'ເລືອກແລ້ວ' : 'ຫວ່າງ')}</div>
-                <div class="plate-number">${car.plate}</div>
+                <div class="badge" style="background:${tourColor}; color:#000;">${busyJob ? busyJob.tourName : (isSelected ? 'ເລືອກແລ້ວ' : 'ຫວ່າງ')}</div>
+                <div class="plate" style="font-size: 1.5rem; font-weight: 800;">${car.plate}</div>
                 <div style="font-weight:700;">👤 ${car.driver}</div>
-                <div style="font-size:14px;"><a href="tel:${car.phone}" style="color:var(--accent); font-weight:bold;">📞 ${car.phone || '---'}</a></div>
+                <div style="font-size:14px;"><a href="tel:${car.phone}" style="color:var(--accent); font-weight:bold; text-decoration:none;">📞 ${car.phone || '---'}</a></div>
                 <div style="margin-top:10px;">
-                    ${busyJob ? `<button class="btn" style="padding:6px; font-size:11px; background:var(--primary); color:white; width:100%;" onclick="event.stopPropagation(); forceReset('${car.plate}')">🔄 Reset ຫວ່າງ</button>` : ''}
+                    ${busyJob ? `<button class="btn-action" style="background:var(--primary); color:white;" onclick="event.stopPropagation(); manageCar('RESET_SINGLE', '${car.plate}')">🔄 Reset ຫວ່າງ</button>` : ''}
+                    ${isAdminMode ? `<button class="btn-action" style="background:#666; color:white;" onclick="event.stopPropagation(); manageCar('DELETE_CAR', '${car.plate}')">❌ ລົບອອກ</button>` : ''}
                 </div>
             `;
             if(!busyJob && !isAdminMode) card.onclick = () => {
@@ -149,7 +136,59 @@
         });
     }
 
-    // ฟังก์ชันอื่นๆ (saveAndSend, parseWhatsApp) ให้ใช้ตามที่แนะนำใน v25.3
+    // 4. บันทึกและส่ง WhatsApp
+    async function saveAndSend() {
+        const tidValue = document.getElementById('tid').value;
+        const locValue = document.getElementById('loc').value;
+        if(!tidValue || !selectedPlates.length) return alert("ເລືອກລົດກ່ອນ!");
+        const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
+        const btn = document.getElementById('waBtn');
+        btn.innerText = "⏳ ບັນທຶກ..."; btn.disabled = true;
+
+        try {
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
+                action: "SAVE_TOUR", tourName: tidValue, location: locValue,
+                start: document.getElementById('start').value, 
+                end: document.getElementById('end').value,
+                selectedCars: selCars
+            })});
+            let msg = `🚛 *ແຈ້ງລົດທົວ: ${tidValue}*\n📍 *ລາຍລະອຽດ:* ${locValue}\n----------\n`;
+            selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver}) 📞 ${c.phone || ''}\n`);
+            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+            selectedPlates = []; setTimeout(syncData, 1500);
+        } catch(e) { alert("Error!"); }
+        finally { btn.innerText = "🚀 ບັນທຶກ & ສົ່ງ WhatsApp"; btn.disabled = false; }
+    }
+
+    // 5. ฟังก์ชันเสริมอื่นๆ
+    function getTourColor(id) {
+        let hash = 0;
+        for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+        return PALETTE[Math.abs(hash) % PALETTE.length];
+    }
+
+    function parseWA() {
+        const t = document.getElementById('rawWA').value;
+        const idM = t.match(/([0-9]{4}[A-Z])/i); if(idM) document.getElementById('tid').value = idM[0];
+        const qM = t.match(/(\d+)\s*(ຄັນ|คัน)/); if(qM) document.getElementById('qty').value = qM[1];
+        render();
+    }
+
+    async function manageCar(action, plate = '') {
+        let payload = { action: action };
+        if(action === 'ADD_CAR') {
+            payload.plate = document.getElementById('addP').value;
+            payload.driver = document.getElementById('addD').value;
+            payload.phone = document.getElementById('addPh').value;
+        } else payload.plate = plate;
+        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+        setTimeout(syncData, 1500);
+    }
+
+    function toggleAdmin() { isAdminMode = !isAdminMode; document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none'; render(); }
+
     window.onload = syncData;
     setInterval(syncData, 30000);
 </script>
+</body>
+</html>
