@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fleet Master v25.6 - Enterprise Sync</title>
+    <title>auto jat lod/title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #e11d48; --accent: #0ea5e9; --bg-dark: #0f172a; --card: #ffffff; --text: #1e293b; --radius: 16px; }
@@ -27,7 +27,7 @@
 
 <div class="container">
     <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="margin:0;">🚛 Fleet Master <span style="color:var(--accent)">v25.6</span></h2>
+        <h2 style="margin:0;">ລະບົບຈັດລົດ by jackie ctv <span style="color:var(--accent)">v25.6</span></h2>
         <button onclick="toggleAdmin()" style="background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">⚙️ ຈັດການລົດ</button>
     </header>
 
@@ -59,7 +59,7 @@
     <div id="fleetGrid" class="fleet-grid"></div>
 </div>
 
-<button id="waBtn" onclick="saveAndSend()">🚀 ບັນທຶກ & ສົ່ງ WhatsApp</button>
+<button id="waBtn" onclick="saveAndSend()"> ບັນທຶກ & ສົ່ງ WhatsApp</button>
 
 <script>
     // 🔗 URL ล่าสุดของคุณ
@@ -152,7 +152,7 @@
             selectedCars: selCars
         })});
         
-        let msg = `🚛 *ແຈ້ງລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${document.getElementById('loc').value}\n----------\n`;
+        let msg = *ແຈ້ງລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${document.getElementById('loc').value}\n----------\n`;
         selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver}) 📞 ${c.phone}\n`);
         window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
         selectedPlates = []; setTimeout(syncData, 1500);
@@ -176,7 +176,7 @@
         render();
     }
 
-    window.onload = syncData; setInterval(syncData, 45000);
+    window.onload = syncData; setInterval(syncData, 15000);
 </script>
 </body>
 </html>
