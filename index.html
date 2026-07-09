@@ -1,200 +1,521 @@
 <!DOCTYPE html>
-<html lang="lo">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ລະບົບຈັດລົດ CTV v25.7</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจองรถตู้เที่ยวหลวงพระบาง | Luang Prabang Van Booking</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #e11d48; --accent: #0ea5e9; --bg-dark: #0f172a; --card: #ffffff; --text: #1e293b; --radius: 16px; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Noto Sans Lao', sans-serif; background: var(--bg-dark); color: #fff; margin: 0; padding-bottom: 120px; }
-        .container { max-width: 900px; margin: 0 auto; padding: 15px; }
-        .panel { background: var(--card); color: var(--text); padding: 20px; border-radius: var(--radius); margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #f8fafc; color: #1e293b; }
-        .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-        .car-card { background: white; color: var(--text); padding: 15px; border-radius: 12px; border-left: 8px solid #cbd5e1; position: relative; transition: 0.3s; cursor: pointer; }
-        .car-card.selected { border-left-width: 15px; border-left-color: var(--accent); background: #f0f9ff; transform: translateY(-3px); }
-        .car-card.busy { opacity: 0.7; background: #f1f5f9; cursor: not-allowed; }
-        .plate { font-size: 1.5rem; font-weight: 800; display: block; color: #0f172a; }
-        .badge { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; }
-        .btn-action { width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        #waBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #22c55e; color: white; border: none; padding: 18px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(34,197,94,0.4); z-index: 1000; cursor: pointer; }
-        @media (max-width: 500px) { .grid-inputs { grid-template-columns: 1fr; } }
+        body { font-family: 'Prompt', 'Noto Sans Lao', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
 
-<div class="container">
-    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="margin:0;">ລະບົບຈັດລົດ CTV <span style="color:var(--accent)">v25.7</span></h2>
-        <button onclick="toggleAdmin()" style="background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">⚙️ ຈັດການລົດ</button>
+    <header class="bg-amber-500 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-md mx-auto px-4 pt-3 pb-4">
+            <div class="flex justify-end gap-1.5 mb-3">
+                <button type="button" onclick="changeLanguage('th')" id="lang-th" class="px-2 py-1 text-xs rounded-lg font-bold bg-white text-amber-600 transition-all shadow-sm">TH</button>
+                <button type="button" onclick="changeLanguage('lo')" id="lang-lo" class="px-2 py-1 text-xs rounded-lg font-bold bg-amber-600 text-white transition-all">LAO</button>
+                <button type="button" onclick="changeLanguage('en')" id="lang-en" class="px-2 py-1 text-xs rounded-lg font-bold bg-amber-600 text-white transition-all">EN</button>
+                <button type="button" onclick="changeLanguage('zh')" id="lang-zh" class="px-2 py-1 text-xs rounded-lg font-bold bg-amber-600 text-white transition-all">中文</button>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 id="ui-title" class="text-xl font-bold tracking-wide">สบายดี หลวงพระบาง</h1>
+                    <p id="ui-subtitle" class="text-xs text-amber-100">บริการรถตู้</p>
+                </div>
+                <span id="ui-currency-badge" class="bg-amber-600 px-3 py-1 rounded-full text-xs font-semibold">🇱🇦 อัตราค่าบริการกีบ (LAK)</span>
+            </div>
+        </div>
     </header>
 
-    <div id="adminPanel" class="panel" style="display:none; border: 2px dashed var(--accent);">
-        <h3 style="margin-top:0;">➕ ເພີ່ມລົດໃໝ່</h3>
-        <div class="grid-inputs">
-            <input type="text" id="addP" placeholder="ທະບຽນລົດ">
-            <input type="text" id="addD" placeholder="ຊື່ຄົນຂັບ">
-            <input type="text" id="addPh" placeholder="ເບີໂທ">
-        </div>
-        <button onclick="manageCar('ADD_CAR')" style="width:100%; padding:12px; background:#0f172a; color:white; border-radius:10px; border:none; cursor:pointer; font-weight:bold;">💾 ບັນທຶກລົດລົງ Sheet</button>
-    </div>
-
-    <div class="panel">
-        <label>📋 ວາງຂໍ້ຄວາມ WhatsApp ເພື່ອດຶງຂໍ້ມູນ</label>
-        <textarea id="rawWA" rows="4" placeholder="ວາງຂໍ້ຄວາມທີ່ນີ້..." oninput="smartParse()"></textarea>
-        <div class="grid-inputs" style="margin-top:15px;">
-            <input type="text" id="tid" placeholder="🆔 ID ทัวร์" oninput="render()">
-            <input type="number" id="qty" placeholder="🔢 จำนวนรถ">
-        </div>
-        <div class="grid-inputs">
-            <input type="datetime-local" id="start">
-            <input type="datetime-local" id="end">
-        </div>
-        <textarea id="loc" rows="2" placeholder="📍 รายละเอียดทัวร์" style="margin-top:10px;"></textarea>
-        <button onclick="fifoMatch()" class="btn-action" style="background:var(--primary); color:white; margin-top:15px;">⚖️ ເລືອກລົດອັດຕະໂນມັດ (FIFO)</button>
-    </div>
-
-    <div id="fleetGrid" class="fleet-grid"></div>
-</div>
-
-<button id="waBtn" onclick="saveAndSend()">🚀 ບັນທຶກ & ສົ່ງ WhatsApp</button>
-
-<script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbx3L75t8xSRwz_pSouWGoJpPPo6Zie1OysT0qSvuWZ480D0-s071_bCKknHK5yyRvvh/exec";
-    const PALETTE = ["#e1f5fe", "#f3e5f5", "#e8f5e9", "#fff3e0", "#efebe9", "#fce4ec", "#e0f2f1"];
-
-    let fleet = []; let cloudData = []; let selectedPlates = []; let isAdminMode = false;
-
-    async function syncData() {
-        try {
-            const res = await fetch(API_URL);
-            const data = await res.json();
-            fleet = data.fleet || [];
-            cloudData = data.activeStatus || [];
-            render();
-        } catch (e) { console.error("Sync Error:", e); render(); }
-    }
-
-    function smartParse() {
-        const t = document.getElementById('rawWA').value;
-        const year = 2026;
+    <main class="max-w-md mx-auto px-4 py-6 pb-32">
         
-        // Extract ID & Qty
-        const idM = t.match(/ລະຫັດທົວ:\s*([0-9A-Z]+)/i) || t.match(/([0-9]{4}[A-Z])/i);
-        if(idM) document.getElementById('tid').value = idM[1] || idM[0];
-        const qM = t.match(/(\d+)\s*(ຄັນ|คัน)/); 
-        if(qM) document.getElementById('qty').value = qM[1];
+        <section class="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <label id="ui-date-label" class="block text-sm font-semibold text-slate-700 mb-2">📅 เลือกวันที่ต้องการเดินทาง</label>
+            <input type="date" id="booking-date" onchange="checkDateAvailability()" class="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-amber-500 bg-slate-50 cursor-pointer">
+            <p id="date-status-msg" class="text-xs mt-1.5 hidden"></p>
+        </section>
 
-        // Deep Date & Time Parser
-        const dRegex = /(\d{1,2})[\/\-](\d{1,2})/g;
-        const tRegex = /(\d{1,2})[:.](\d{2})/g;
-        let dFound = [], tFound = [], d, tm;
-        while ((d = dRegex.exec(t)) !== null) dFound.push({ d: d[1].padStart(2,'0'), m: d[2].padStart(2,'0'), idx: d.index });
-        while ((tm = tRegex.exec(t)) !== null) tFound.push({ h: tm[1].padStart(2,'0'), i: tm[2], idx: tm.index });
+        <section class="mb-6">
+            <label id="ui-step1-label" class="block text-sm font-semibold text-slate-700 mb-3">1. เลือกรูปแบบการเดินทางของคุณ</label>
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" id="btn-mode-daily" onclick="setBookingMode('daily')" 
+                    class="p-4 rounded-2xl border-2 transition-all duration-200 text-left flex flex-col justify-between h-28 bg-white border-slate-200 hover:border-amber-500 active:scale-95 cursor-pointer">
+                    <span class="text-2xl">📅</span>
+                    <div>
+                        <span id="ui-mode-daily-title" class="block font-bold text-base">เหมาวัน (7:00-19:00)</span>
+                        <span id="ui-mode-daily-price" class="text-xs text-slate-500">1,300,000 กีบ/วัน</span>
+                    </div>
+                </button>
+                <button type="button" id="btn-mode-fixed" onclick="setBookingMode('fixed')" 
+                    class="p-4 rounded-2xl border-2 transition-all duration-200 text-left flex flex-col justify-between h-28 bg-white border-slate-200 hover:border-amber-500 active:scale-95 cursor-pointer">
+                    <span class="text-2xl">📍</span>
+                    <div>
+                        <span id="ui-mode-fixed-title" class="block font-bold text-base">จองรายสถานที่</span>
+                        <span id="ui-mode-fixed-price" class="text-xs text-slate-500">เริ่มต้น 150,000 กีบ</span>
+                    </div>
+                </button>
+            </div>
+        </section>
 
-        if(dFound.length >= 1) {
-            const sD = dFound[0]; const sT = tFound.find(x => x.idx > sD.idx) || { h: "08", i: "00" };
-            document.getElementById('start').value = `${year}-${sD.m}-${sD.d}T${sT.h}:${sT.i}`;
-        }
-        if(dFound.length >= 2) {
-            const eD = dFound[dFound.length - 1]; const eT = tFound.filter(x => x.idx > eD.idx).pop() || { h: "17", i: "00" };
-            document.getElementById('end').value = `${year}-${eD.m}-${eD.d}T${eT.h}:${eT.i}`;
-        }
-
-        // Extract Details
-        const lines = t.split('\n');
-        document.getElementById('loc').value = lines.filter(l => l.includes("ຮັບ") || l.includes("ສົ່ງ") || l.includes("ທ່ຽວ") || l.includes("ຮ້ານ")).join(" | ").replace(/[.:]+/g, '').trim();
-        render();
-    }
-
-    function render() {
-        const container = document.getElementById('fleetGrid');
-        const tid = document.getElementById('tid').value || "SEL";
-        container.innerHTML = '';
-
-        fleet.forEach(car => {
-            const busyJob = cloudData.find(c => c.plate.toString() === car.plate.toString() && c.status === "Busy");
-            const isSelected = selectedPlates.includes(car.plate);
-            let tourColor = busyJob ? getTourColor(busyJob.tourName) : (isSelected ? getTourColor(tid) : "#cbd5e1");
-            
-            const card = document.createElement('div');
-            card.className = `car-card ${isSelected ? 'selected' : ''} ${busyJob ? 'busy' : ''}`;
-            card.style.borderLeftColor = tourColor;
-            if(isSelected || busyJob) card.style.backgroundColor = tourColor + "44"; 
-
-            card.innerHTML = `
-                <div class="badge" style="background:${tourColor}; color:#000;">${busyJob ? busyJob.tourName : (isSelected ? 'ເລືອກແລ້ວ' : 'ຫວ່າງ')}</div>
-                <div class="plate">${car.plate}</div>
-                <div style="font-weight:700;">👤 ${car.driver}</div>
-                <div style="font-size:14px;"><a href="tel:${car.phone}" style="color:var(--accent); font-weight:bold; text-decoration:none;">📞 ${car.phone}</a></div>
-                <div style="margin-top:10px;">
-                    ${busyJob ? `<button class="btn-action" style="background:var(--primary); color:white;" onclick="event.stopPropagation(); manageCar('RESET_SINGLE', '${car.plate}')">🔄 Reset ຫວ່າງ</button>` : ''}
+        <section class="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <label id="ui-step2-label" class="block text-sm font-semibold text-slate-700 mb-2">2. จำนวนผู้โดยสาร (มีผลต่อการคำนวณราคา)</label>
+            <div class="flex items-center justify-between mt-3">
+                <span id="ui-pax-text" class="text-sm text-slate-600">ระบุจำนวนคน:</span>
+                <div class="flex items-center gap-4">
+                    <button type="button" onclick="updatePax(-1)" class="w-10 h-10 rounded-full bg-slate-100 font-bold text-lg active:bg-slate-200 flex items-center justify-center cursor-pointer">-</button>
+                    <span id="pax-display" class="text-xl font-bold w-8 text-center">1</span>
+                    <button type="button" onclick="updatePax(1)" class="w-10 h-10 rounded-full bg-slate-100 font-bold text-lg active:bg-slate-200 flex items-center justify-center cursor-pointer">+</button>
                 </div>
-            `;
-            if(!busyJob && !isAdminMode) card.onclick = () => toggle(car.plate);
-            container.appendChild(card);
-        });
-    }
+            </div>
+        </section>
 
-    async function manageCar(action, plate = '') {
-        const payload = { action: action, plate: plate };
-        if(action === 'ADD_CAR') {
-            payload.plate = document.getElementById('addP').value;
-            payload.driver = document.getElementById('addD').value;
-            payload.phone = document.getElementById('addPh').value;
+        <section id="section-daily" class="hidden mb-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <label id="ui-daily-label" class="block text-sm font-semibold text-slate-700 mb-2">3. ตัวเลือกเพิ่มเติมสำหรับเหมาวัน</label>
+            <p id="ui-daily-warn" class="text-xs text-amber-600 mb-3">⚠️ เงื่อนไข: หากไปตาดกวางซี จะไม่สามารถไปถ้ำติ่งในวันเดียวกันได้</p>
+            
+            <div class="space-y-3">
+                <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+                    <div class="flex flex-col">
+                        <span id="ui-chk-kwangsi" class="font-medium text-sm">ไปน้ำตกตาดกวางซี</span>
+                    </div>
+                    <input type="checkbox" id="chk-daily-kwangsi" onchange="handleDailyConflict('kwangsi')" class="w-5 h-5 accent-amber-500">
+                </label>
+                <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+                    <div class="flex flex-col">
+                        <span id="ui-chk-ting" class="font-medium text-sm">ไปถ้ำติ่ง</span>
+                    </div>
+                    <input type="checkbox" id="chk-daily-ting" onchange="handleDailyConflict('ting')" class="w-5 h-5 accent-amber-500">
+                </label>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                <label id="ui-ot-title" class="block text-sm font-medium text-slate-700 mb-1">จำนวนชั่วโมงที่ใช้เกินเวลา (เกิน 19:00 น.)</label>
+                <div class="flex items-center justify-between">
+                    <span id="ui-ot-desc" class="text-xs text-slate-500">คิดชั่วโมงละ 200,000 กีบ</span>
+                    <select id="select-overtime" onchange="calculatePrice()" class="p-2 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:border-amber-500"></select>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-fixed" class="hidden mb-6">
+            <label id="ui-fixed-label" class="block text-sm font-semibold text-slate-700 mb-3">3. เลือกสถานที่ท่องเที่ยว / จุดรับส่ง</label>
+            <div id="fixed-routes-list" class="space-y-2.5"></div>
+        </section>
+
+        <section class="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <label id="ui-step4-label" class="block text-sm font-semibold text-slate-700 mb-3">4. ข้อมูลติดต่อผู้จอง</label>
+            <div class="space-y-3">
+                <input type="text" id="cust-name" class="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-amber-500" required>
+                <input type="tel" id="cust-phone" class="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-amber-500" required>
+            </div>
+        </section>
+
+        <hr class="my-8 border-slate-200">
+        <section class="bg-slate-800 text-white p-4 rounded-2xl shadow-md">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-bold text-amber-400">⚙️ แผงควบคุมเจ้าของรถ (Admin)</h3>
+                <button type="button" id="btn-admin-login" onclick="toggleAdminPanel()" class="text-xs bg-slate-700 px-3 py-1 rounded-lg hover:bg-slate-600">เข้าสู่ระบบ</button>
+            </div>
+            
+            <div id="admin-controls" class="hidden space-y-3 pt-2 border-t border-slate-700">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">เลือกวันที่ต้องการ "ล็อก/ปลดล็อก" รถว่าง:</label>
+                    <input type="date" id="admin-date-picker" class="w-full p-2 rounded-xl text-slate-900 bg-white text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="setDayStatus(false)" class="bg-red-600 hover:bg-red-700 p-2.5 rounded-xl font-bold text-xs">🔒 ล็อก (ไม่ว่าง/จองแล้ว)</button>
+                    <button type="button" onclick="setDayStatus(true)" class="bg-emerald-600 hover:bg-emerald-700 p-2.5 rounded-xl font-bold text-xs">🔓 ปลดล็อก (ว่าง)</button>
+                </div>
+                <div class="text-[11px] text-slate-400 bg-slate-900 p-2 rounded-lg">
+                    <strong>รายการวันที่ถูกล็อกไว้:</strong>
+                    <div id="locked-dates-list" class="mt-1 flex flex-wrap gap-1">ไม่มีวันทีถูกบล็อก</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50">
+        <div class="max-w-md mx-auto px-4 py-4 flex items-center justify-between gap-4">
+            <div class="flex-1">
+                <span id="ui-total-text" class="text-xs text-slate-500 block">ราคารวมสุทธิ</span>
+                <span id="total-price-display" class="text-2xl font-bold text-amber-600">0</span>
+                <span id="ui-currency-label" class="text-xs font-semibold text-slate-500">กีบ (LAK)</span>
+            </div>
+            <button type="button" onclick="submitBookingToWhatsApp()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-center py-3.5 px-4 rounded-2xl font-bold text-base transition-all duration-150 shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                <span id="ui-submit-btn">💬 จองผ่าน WhatsApp</span>
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. CONFIGURATION & DICTIONARIES (i18n) ---
+        const WHATSAPP_NUMBER = "8562055555555"; 
+        const ADMIN_PASSWORD = "1234"; // ⚠️ รหัสสำหรับเจ้าของเข้าล็อกวัน (เปลี่ยนได้ตามใจชอบ)
+
+        const DATA_ROUTES = [
+            { id: 'city', basePrice: 800000, tiered: false, names: { th: '📍 ที่ยวในเมืองหลวงพระบาง', lo: '📍 ທ່ຽວໃນເມືອງຫຼວງພະບາງ', en: '📍 City Tour Luang Prabang', zh: '📍 琅勃拉邦市内游' }, descs: { th: 'วัดเชียงทอง, พระราชวัง, พูสี', lo: 'ວັດຊຽງທອງ, ພະຣາຊະວັງ, ພູສີ', en: 'Wat Xieng Thong, Royal Palace, Mount Phousi', zh: '香通寺、皇宫博物馆、普西山' } },
+            { id: 'tadsae', basePrice: 800000, tiered: true, tierThreshold: 10, tierPrice: 1000000, names: { th: '🌊 น้ำตกตาดแส้', lo: '🌊 ນ້ຳຕົກຕາດແສ້', en: '🌊 Tad Sae Waterfall', zh: '🌊 白雪瀑布' }, descs: { th: 'ราคาตามจำนวนคน (10-12 คนปรับราคา)', lo: 'ລາຄາຕາມຈຳນວນຄົນ (10-12 ຄົນປັບລາຄา)', en: 'Price based on pax tier', zh: '价格依人数调整' } },
+            { id: 'tingcave', basePrice: 800000, tiered: true, tierThreshold: 10, tierPrice: 1000000, names: { th: '⛰️ ถ้ำติ่ง', lo: '⛰️ ຖ້ຳຕິ່ງ', en: '⛰️ Pak Ou Caves', zh: '⛰️ 巴乌溶洞' }, descs: { th: 'ราคาตามจำนวนคน (10-12 คนปรับราคา)', lo: 'ລາຄาตามຈຳນວນຄົນ (10-12 ຄົນປັບລາຄາ)', en: 'Price based on pax tier', zh: '价格依人数调整' } },
+            { id: 'kwangsi', basePrice: 800000, tiered: true, tierThreshold: 10, tierPrice: 1000000, names: { th: '🍀 น้ำตกตาดกวางซี', lo: '🍀 ຕາດກວາງຊີ', en: '🍀 Kuang Si Waterfall', zh: '🍀 关西瀑布' }, descs: { th: 'แลนด์มาร์กยอดฮิต หลวงพระบาง', lo: 'ແລນມາກຍອດຮິດ ຫຼວງພະບາງ', en: 'Must-visit landmark', zh: '琅勃拉邦必去地标' } },
+            { id: 'tadhoikhua', basePrice: 700000, tiered: false, names: { th: '🧗 น้ำตกตาดร้อยครัว', lo: '🧗 ຕາດຮ້ອຍຄົວ', en: '🧗 Tad Hoi Khua Waterfall', zh: '🧗 百跨瀑布' }, descs: { th: 'ไม่รวมค่าธรรมเนียมบัตรข้ามฟาก', lo: 'ບໍ່ລວມຄ່າຂ້າມບັກນອກ', en: 'Excludes ferry fee', zh: '不含渡轮过江费' } },
+            { id: 'nongkhiaw_round', basePrice: 3000000, tiered: false, names: { th: '🚖 หนองเขียว - เมืองงอย (ไป-กลับ)', lo: '🚖 ໜອງຂຽວ ເມືອງງອຍ ໄປກັບ', en: '🚖 Nong Khiaw (Round Trip)', zh: '🚖 农巧 - 孟威 (往返)' }, descs: { th: 'ทริปเส้นทางธรรมชาติสายเหนือ', lo: 'ທຣິບເສັ້ນທາງທຳມະຊາດສາຍເໜືອ', en: 'Northern nature eco-route', zh: '北部原生态风景线' } },
+            { id: 'nongkhiaw_drop', basePrice: 2500000, tiered: false, names: { th: '🚩 หนองเขียว - เมืองงอย (ส่งขาเดียว)', lo: '🚩 ໜອງຂຽວ ເມືອງງອຍ ສົ່ງປ່ອຍ', en: '🚩 Nong Khiaw (One Way)', zh: '🚩 农巧 - 孟威 (单程送达)' }, descs: { th: 'ไปส่งที่ท่าเรือหรือที่พัก', lo: 'ໄປສົ່ງປ່ອຍຢູ່ທ່າເຮືອ ຫຼື ທີ່ພັກ', en: 'Drop-off at destination', zh: '送达码头或指定酒店' } },
+            { id: 'train_station', basePrice: 300000, tiered: false, maxPax: 6, names: { th: '🚄 รับ-ส่ง สถานีรถไฟความเร็วสูง', lo: '🚄 ຮັບສົ່ງສະຖານີລົດໄຟ', en: '🚄 Railway Station Transfer', zh: '🚄 高铁站接送' }, descs: { th: 'จำกัดไม่เกิน 6 คน', lo: 'ຈຳກັດບໍ່ເກີນ 6 ຄົນ', en: 'Max 6 passengers', zh: '限 6 人以内的团体' } },
+            { id: 'airport_pickup', basePrice: 200000, tiered: false, names: { th: '✈️ รับจากสนามบินหลวงพระบาง', lo: '✈️ ຮັບຈາກສະໜາມບິນ', en: '✈️ Airport Pickup', zh: '✈️ 机场接机' }, descs: { th: 'คนขาวชูป้ายชื่อรอที่ประตูขาเข้า', lo: 'ຄົນຂັບຊູປ້ายຊື່ລໍຖ້າ', en: 'Driver holding sign at arrival gate', zh: '司机持名牌在到达口迎接' } },
+            { id: 'airport_drop', basePrice: 150000, tiered: false, names: { th: '✈️ ส่งที่สนามบินหลวงพระบาง', lo: '✈️ ສົ່ງທີ່ສະໜາມບິນ', en: '✈️ Airport Drop-off', zh: '✈️ 机场送机' }, descs: { th: 'ส่งตรงเวลา เช็คอินราบรื่น', lo: 'ສົ່ງຕົງເວລາ ເຊັກອິນລາບລື່ນ', en: 'Punctual drop-off service', zh: '准时送达、值机无忧' } }
+        ];
+
+        const I18N = {
+            th: {
+                title: "สบายดี หลวงพระบาง", subtitle: "บริการรถตู้ VIP นำเที่ยวอุ่นใจ", badge: "🇱🇦 อัตราค่าบริการกีบ (LAK)",
+                step1: "1. เลือกรูปแบบการเดินทางของคุณ", daily: "เหมาวัน (7:00-19:00)", fixed: "จองรายสถานที่",
+                dailyRate: "1,300,000 กีบ/วัน", fixedRate: "เริ่มต้น 150,000 กีบ", step2: "2. จำนวนผู้โดยสาร (มีผลต่อการคำนวณราคา)",
+                paxText: "ระบุจำนวนคน:", dailyLabel: "3. ตัวเลือกเพิ่มเติมสำหรับเหมาวัน", dailyWarn: "⚠️ เงื่อนไข: หากไปตาดกวางซี จะไม่สามารถไปถ้ำติ่งในวันเดียวกันได้",
+                kwangsi: "ไปน้ำตกตาดกวางซี", ting: "ไปถ้ำติ่ง", otTitle: "จำนวนชั่วโมงที่ใช้เกินเวลา (เกิน 19:00 น.)", otDesc: "คิดชั่วโมงละ 200,000 กีบ",
+                fixedLabel: "3. เลือกสถานที่ท่องเที่ยว / จุดรับส่ง", step4: "4. ข้อมูลติดต่อผู้จอง", namePlaceholder: "ชื่อ-นามสกุล ผู้จอง",
+                phonePlaceholder: "เบอร์โทรศัพท์ (WhatsApp/Line)", totalText: "ราคารวมสุทธิ", currencyLabel: "กีบ (LAK)", submitBtn: "💬 จองผ่าน WhatsApp",
+                otOptions: ["ไม่เกินเวลา", "เกิน 1 ชั่วโมง", "เกิน 2 ชั่วโมง", "เกิน 3 ชั่วโมง", "เกิน 4 ชั่วโมง"], currency: "กีบ",
+                alertName: "❌ กรุณากรอกชื่อผู้จองครับ", alertPhone: "❌ กรุณากรอกเบอร์โทรศัพท์ติดต่อครับ", alertRoute: "❌ กรุณาเลือกสถานที่ท่องเที่ยวที่ต้องการจองครับ",
+                alertTrainRule: "ℹ️ ข้อมูลเพิ่มเติม: เนื่องจากผู้โดยสารเกิน 6 คนสำหรับการรับส่งสถานีรถไฟ ระบบจะคำนวณราคาเป็นรอบเปิดรถตู้เพิ่มให้โดยอัตโนมัติครับ",
+                uiDate: "📅 เลือกวันที่ต้องการเดินทาง", alertDateEmpty: "❌ กรุณาเลือกวันที่ต้องการเดินทางด้วยครับ", alertDateFull: "❌ ขออภัยด้วยครับ! วันที่คุณเลือกมีผู้จองเต็มแล้ว โปรดเลือกวันอื่นแทน"
+            },
+            lo: {
+                title: "ສະບາຍດີ ຫຼວງພະບາງ", subtitle: "ບໍລິການລົດຕູ້ VIP ນຳທ່ຽວອຸ່ນໃຈ", badge: "🇱🇦 ອັດຕາຄ່າບໍລິການກີບ (LAK)",
+                step1: "1. ເລືອກຮູບແບບການເດີນທາງຂອງທ່ານ", daily: "ເໝົາໝົດມື້ (7:00-19:00)", fixed: "ຈອງຕາມສະຖານທີ່",
+                dailyRate: "1,300,000 ກີບ/ມື້", fixedRate: "ເລີ່ມຕົ້ນ 150,000 ກີບ", step2: "2. ຈຳນວນຜູ້ໂດຍສານ (ມີຜົນຕໍ່ການຄິດໄລ່ລາຄາ)",
+                paxText: "ລະບຸຈຳນວນຄົນ:", dailyLabel: "3. ຕົວເລືອກເພີ່ມເຕີມສຳລັບເໝົາໝົດມື້", dailyWarn: "⚠️ ເງື່ອນໄຂ: ຖ້າໄປຕາດກວາງຊີ ແມ່ນຈະບໍ່ໄດ້ໄປຖ້ຳຕິ່ງໃນມື້ດຽວກັນ",
+                kwangsi: "ໄປນ້ຳຕົກຕາດກວາງຊີ", ting: "ໄປຖ້ຳຕິ່ງ", otTitle: "ຈຳນວນຊົ່ວໂມງທີ່ເກີນເວລາ (ຫຼັງ 19:00)", otDesc: "ຄິດຊົ່ວໂມງລະ 200,000 ກີບ",
+                fixedLabel: "3. ເລືອກສະຖານທີ່ທ່ອງທ່ຽວ / ຈຸດຮັບສົ່ງ", step4: "4. ຂໍ້ມູນຕິດຕໍ່ຜູ້ຈອງ", namePlaceholder: "ຊື່ ແລະ ນາມສະກຸນ",
+                phonePlaceholder: "ເບີໂທລະສັບ (WhatsApp/Line)", totalText: "ລາຄາລວມທັງໝົດ", currencyLabel: "ກີບ (LAK)", submitBtn: "💬 ຈອງຜ່ານ WhatsApp",
+                otOptions: ["ບໍ່ເກີນເວລາ", "ເກີນ 1 ຊົ່ວໂມງ", "ເກີນ 2 ຊົ່ວໂມງ", "ເກີນ 3 ຊົ່ວໂມງ", "ເກີນ 4 ຊົ່ວໂມງ"], currency: "ກີບ",
+                alertName: "❌ ກະລຸນາໃສ່ຊື່ຜູ້ຈອງດ້ວຍຄວາມຖືກຕ້ອງ", alertPhone: "❌ ກະລຸນາໃສ່ເບີໂທລະສັບຕິດຕໍ່", alertRoute: "❌ ກະລຸນາເລືອກສະຖານທີ່ທ່ອງທ່ຽວທີ່ຕ້ອງການຈອງ",
+                alertTrainRule: "ℹ️ ຂໍ້ມູນເພີ່ມເຕີມ: ເນື່ອງຈາກຜູ້ໂດຍສານເກີນ 6 ຄົນ, ລະບົບຈະຄິດໄລ່ລາຄາເປີດລົດຕູ້ເພີ່ມໃຫ້ໂດຍອັດຕະໂນມັດ",
+                uiDate: "📅 ເລືອກວັນທີຕ້ອງການເດີນທາງ", alertDateEmpty: "❌ ກະລຸນາເລືອກວັນທີເດີນທາງ", alertDateFull: "❌ ຂໍອະໄພ! ວັນທີນີ້ມີຄົນຈອງເຕັມແລ້ວ ກະລຸນາເລືອກວັນອື່ນ"
+            },
+            en: {
+                title: "Sabaidee Luang Prabang", subtitle: "Premium VIP Van Rental Service", badge: "🇱🇦 Rates in Lao Kip (LAK)",
+                step1: "1. Select Your Booking Mode", daily: "Daily Rental (7:00-19:00)", fixed: "Fixed Destination",
+                dailyRate: "1,300,000 LAK/Day", fixedRate: "Starts 150,000 LAK", step2: "2. Number of Passengers",
+                paxText: "Specify Pax:", dailyLabel: "3. Additional Options for Daily Rental", dailyWarn: "⚠️ Rule: Cannot visit Kuang Si Waterfall & Pak Ou Caves on the same day.",
+                kwangsi: "Visit Kuang Si Waterfall", ting: "Visit Pak Ou Caves (Tham Ting)", otTitle: "Overtime Hours (After 19:00)", otDesc: "200,000 LAK per Hour",
+                fixedLabel: "3. Select Attractions / Transfer Points", step4: "4. Contact Information", namePlaceholder: "Your Full Name",
+                phonePlaceholder: "Phone Number (WhatsApp/Line)", totalText: "Total Net Price", currencyLabel: "LAK", submitBtn: "💬 Book via WhatsApp",
+                otOptions: ["No Overtime", "Over 1 Hour", "Over 2 Hours", "Over 3 Hours", "Over 4 Hours"], currency: "LAK",
+                alertName: "❌ Please enter your name", alertPhone: "❌ Please enter your phone number", alertRoute: "❌ Please select a destination",
+                alertTrainRule: "ℹ️ Notice: Since passengers exceed 6 people for the train transfer, the system automatically adds another van group unit.",
+                uiDate: "📅 Select Travel Date", alertDateEmpty: "❌ Please select your travel date", alertDateFull: "❌ Sorry! This date is fully booked. Please select another date."
+            },
+            zh: {
+                title: "你好 琅勃拉邦", subtitle: "尊享 VIP 面包车包车服务", badge: "🇱🇦 结算货币：基普 (LAK)",
+                step1: "1. 选择您的包车模式", daily: "全天包车 (7:00-19:00)", fixed: "按目的地游览",
+                dailyRate: "1,300,000 基普/天", fixedRate: "150,000 基普起", step2: "2. 乘车人数 (影响价格计算)",
+                paxText: "乘车人数:", dailyLabel: "3. 全天包车附加选项", dailyWarn: "⚠️ 提示：同一天内关西瀑布与巴乌溶洞仅可择一前往。",
+                kwangsi: "前往关西瀑布", ting: "前往巴乌溶洞", otTitle: "超时数 (19:00 之后)", otDesc: "超时费用 200,000 基普 / 小时",
+                fixedLabel: "3. 选择旅游景点 / 接送地点", step4: "4. 填写联系人信息", namePlaceholder: "您的姓名",
+                phonePlaceholder: "联系电话 (WhatsApp/Line)", totalText: "总计费用", currencyLabel: "基普 (LAK)", submitBtn: "💬 通过 WhatsApp 预订",
+                otOptions: ["无超时", "超时 1 小时", "超时 2 小时", "超时 3 小时", "超时 4 小时"], currency: "基普",
+                alertName: "❌ 请输入您的姓名", alertPhone: "❌ 请输入您的联系电话", alertRoute: "❌ 请选择您的目的地",
+                alertTrainRule: "ℹ️ 提示：由于高铁站接送人数已超过 6 人，系统已自动调配并累加额外车辆费用。",
+                uiDate: "📅 选择您的出行日期", alertDateEmpty: "❌ 请选择您的出行日期", alertDateFull: "❌ 抱歉！该日期已被预订满，请选择其他日期。"
+            }
+        };
+
+        // --- 2. APPLICATION STATE ---
+        let currentLang = 'th';
+        let state = {
+            bookingMode: 'daily',
+            paxCount: 1,
+            selectedFixedRouteId: null,
+            overtimeHours: 0,
+            totalPrice: 0,
+            travelDate: ""
+        };
+
+        // โหลดข้อมูล "วันที่ไม่ว่าง" จาก localStorage (หากไม่มีให้เป็นอาเรย์ว่าง)
+        let bookedDates = JSON.parse(localStorage.getItem('van_booked_dates')) || [];
+        let isAdminLoggedIn = false;
+
+        // --- 3. DOM CORE ENGINE & i18n SWITCHER ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // ป้องกันการเลือกวันย้อนหลังในฝั่งผู้ใช้และฝั่งแอดมิน
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('booking-date').min = todayStr;
+            document.getElementById('admin-date-picker').min = todayStr;
+            
+            changeLanguage('th'); 
+            renderAdminLockedDates();
+        });
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const dict = I18N[lang];
+
+            document.getElementById('ui-title').innerText = dict.title;
+            document.getElementById('ui-subtitle').innerText = dict.subtitle;
+            document.getElementById('ui-currency-badge').innerText = dict.badge;
+            document.getElementById('ui-date-label').innerText = dict.uiDate;
+            document.getElementById('ui-step1-label').innerText = dict.step1;
+            document.getElementById('ui-mode-daily-title').innerText = dict.daily;
+            document.getElementById('ui-mode-daily-price').innerText = dict.dailyRate;
+            document.getElementById('ui-mode-fixed-title').innerText = dict.fixed;
+            document.getElementById('ui-mode-fixed-price').innerText = dict.fixedRate;
+            document.getElementById('ui-step2-label').innerText = dict.step2;
+            document.getElementById('ui-pax-text').innerText = dict.paxText;
+            document.getElementById('ui-daily-label').innerText = dict.dailyLabel;
+            document.getElementById('ui-daily-warn').innerText = dict.dailyWarn;
+            document.getElementById('ui-chk-kwangsi').innerText = dict.kwangsi;
+            document.getElementById('ui-chk-ting').innerText = dict.ting;
+            document.getElementById('ui-ot-title').innerText = dict.otTitle;
+            document.getElementById('ui-ot-desc').innerText = dict.otDesc;
+            document.getElementById('ui-fixed-label').innerText = dict.fixedLabel;
+            document.getElementById('ui-step4-label').innerText = dict.step4;
+            document.getElementById('cust-name').placeholder = dict.namePlaceholder;
+            document.getElementById('cust-phone').placeholder = dict.phonePlaceholder;
+            document.getElementById('ui-total-text').innerText = dict.totalText;
+            document.getElementById('ui-currency-label').innerText = ` ${dict.currencyLabel}`;
+            document.getElementById('ui-submit-btn').innerText = dict.submitBtn;
+
+            const overtimeSelect = document.getElementById('select-overtime');
+            const cachedVal = overtimeSelect.value || "0";
+            overtimeSelect.innerHTML = dict.otOptions.map((opt, i) => `<option value="${i}">${opt}</option>`).join('');
+            overtimeSelect.value = cachedVal;
+
+            renderFixedRoutes();
+            setBookingMode(state.bookingMode);
+            checkDateAvailability();
         }
-        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-        setTimeout(syncData, 1500);
-    }
 
-    async function saveAndSend() {
-        const tid = document.getElementById('tid').value;
-        const loc = document.getElementById('loc').value;
-        if(!tid || !selectedPlates.length) return alert("ຂໍ້ມູນບໍ່ຄົບ!");
-        
-        const selCars = fleet.filter(f => selectedPlates.includes(f.plate));
-        const btn = document.getElementById('waBtn'); btn.disabled = true;
+        // เช็คว่าวันทีเลือกนั้น "ว่าง" หรือ "เต็ม"
+        function checkDateAvailability() {
+            const dateInput = document.getElementById('booking-date');
+            const msgEl = document.getElementById('date-status-msg');
+            state.travelDate = dateInput.value;
 
-        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
-            action: "SAVE_TOUR", tourName: tid, tourLoc: loc,
-            startTime: document.getElementById('start').value, 
-            endTime: document.getElementById('end').value,
-            selectedCars: selCars
-        })});
-        
-        let msg = `🚛 *ແຈ້ງລົດທົວ: ${tid}*\n📍 *ລາຍລະອຽດ:* ${loc}\n----------\n`;
-        selCars.forEach((c, i) => msg += `${i+1}. ✅ *${c.plate}* (${c.driver}) 📞 ${c.phone}\n`);
-        
-        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-        selectedPlates = []; setTimeout(syncData, 1500);
-        btn.disabled = false;
-    }
+            if (!state.travelDate) {
+                msgEl.classList.add('hidden');
+                return true;
+            }
 
-    function fifoMatch() {
-        const q = parseInt(document.getElementById('qty').value) || 0;
-        if (q <= 0) return alert("ກະລຸນາໃສ່ຈຳນວນລົດ!");
-        const busyPlates = new Set(cloudData.filter(d => d.status === "Busy").map(d => d.plate));
-        let freeCars = fleet.filter(c => !busyPlates.has(c.plate));
-        freeCars.sort((a, b) => {
-            const lastA = cloudData.filter(d => d.plate === a.plate).pop();
-            const lastB = cloudData.filter(d => d.plate === b.plate).pop();
-            return (lastA ? new Date(lastA.timestamp) : 0) - (lastB ? new Date(lastB.timestamp) : 0);
-        });
-        selectedPlates = freeCars.slice(0, q).map(c => c.plate);
-        render();
-    }
+            if (bookedDates.includes(state.travelDate)) {
+                msgEl.innerText = currentLang === 'th' ? "❌ วันนี้คิวรถเต็มแล้วครับ" : I18N[currentLang].alertDateFull;
+                msgEl.className = "text-xs mt-1.5 text-red-600 font-bold block";
+                return false;
+            } else {
+                msgEl.innerText = currentLang === 'th' ? "✅ วันนี้รถว่าง สามารถจองได้ครับ" : "✅ Available";
+                msgEl.className = "text-xs mt-1.5 text-emerald-600 font-bold block";
+                return true;
+            }
+        }
 
-    function getTourColor(id) {
-        let hash = 0; for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-        return PALETTE[Math.abs(hash) % PALETTE.length];
-    }
-    function toggle(p) { const i = selectedPlates.indexOf(p); if(i > -1) selectedPlates.splice(i, 1); else selectedPlates.push(p); render(); }
-    function toggleAdmin() { isAdminMode = !isAdminMode; document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none'; render(); }
+        function renderFixedRoutes() {
+            const container = document.getElementById('fixed-routes-list');
+            container.innerHTML = DATA_ROUTES.map(route => {
+                const isSelected = state.selectedFixedRouteId === route.id;
+                const borderClass = isSelected ? "border-amber-500 bg-amber-50/50" : "border-slate-200 bg-white";
+                
+                return `
+                    <button type="button" id="btn-route-${route.id}" onclick="selectFixedRoute('${route.id}')"
+                        class="w-full text-left p-4 border-2 rounded-2xl flex justify-between items-center transition-all duration-150 hover:border-amber-500 cursor-pointer active:scale-[0.99] ${borderClass}">
+                        <div>
+                            <span class="block font-bold text-base text-slate-800">${route.names[currentLang]}</span>
+                            <span class="block text-xs text-slate-400 mt-1">${route.descs[currentLang]}</span>
+                        </div>
+                        <div class="text-right pl-2 flex flex-col items-end">
+                            <span id="price-tag-${route.id}" class="text-base font-bold text-slate-700"></span>
+                            <span class="text-[10px] text-slate-400 mt-0.5">${I18N[currentLang].currency}</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
 
-    window.onload = syncData; setInterval(syncData, 1000);
-</script>
+        function setBookingMode(mode) {
+            state.bookingMode = mode;
+            const btnDaily = document.getElementById('btn-mode-daily');
+            const btnFixed = document.getElementById('btn-mode-fixed');
+            const secDaily = document.getElementById('section-daily');
+            const secFixed = document.getElementById('section-fixed');
+
+            if (mode === 'daily') {
+                btnDaily.className = "p-4 rounded-2xl border-2 text-left flex flex-col justify-between h-28 transition-all duration-200 border-amber-500 bg-amber-50/50 cursor-pointer w-full";
+                btnFixed.className = "p-4 rounded-2xl border-2 text-left flex flex-col justify-between h-28 transition-all duration-200 border-slate-200 bg-white cursor-pointer w-full";
+                secDaily.classList.remove('hidden');
+                secFixed.classList.add('hidden');
+            } else {
+                btnFixed.className = "p-4 rounded-2xl border-2 text-left flex flex-col justify-between h-28 transition-all duration-200 border-amber-500 bg-amber-50/50 cursor-pointer w-full";
+                btnDaily.className = "p-4 rounded-2xl border-2 text-left flex flex-col justify-between h-28 transition-all duration-200 border-slate-200 bg-white cursor-pointer w-full";
+                secFixed.classList.remove('hidden');
+                secDaily.classList.add('hidden');
+            }
+            calculatePrice();
+        }
+
+        function updatePax(amount) {
+            const newPax = state.paxCount + amount;
+            if (newPax >= 1 && newPax <= 15) {
+                state.paxCount = newPax;
+                document.getElementById('pax-display').innerText = state.paxCount;
+                calculatePrice();
+            }
+        }
+
+        function handleDailyConflict(selected) {
+            const kwangsi = document.getElementById('chk-daily-kwangsi');
+            const ting = document.getElementById('chk-daily-ting');
+            if (selected === 'kwangsi' && kwangsi.checked) ting.checked = false;
+            else if (selected === 'ting' && ting.checked) kwangsi.checked = false;
+            calculatePrice();
+        }
+
+        function selectFixedRoute(routeId) {
+            state.selectedFixedRouteId = routeId;
+            DATA_ROUTES.forEach(r => {
+                const btn = document.getElementById(`btn-route-${r.id}`);
+                if (btn) {
+                    if (r.id === routeId) btn.className = "w-full text-left p-4 border-2 rounded-2xl flex justify-between items-center transition-all duration-150 border-amber-500 bg-amber-50/50 cursor-pointer active:scale-[0.99]";
+                    else btn.className = "w-full text-left p-4 bg-white border-2 border-slate-200 rounded-2xl flex justify-between items-center transition-all duration-150 hover:border-amber-500 cursor-pointer active:scale-[0.99]";
+                }
+            });
+            calculatePrice();
+        }
+
+        // --- 4. CALCULATION ENGINE ---
+        function calculatePrice() {
+            DATA_ROUTES.forEach(route => {
+                let currentRoutePrice = route.basePrice;
+                if (route.tiered && state.paxCount >= route.tierThreshold) {
+                    currentRoutePrice = route.tierPrice;
+                }
+                const tag = document.getElementById(`price-tag-${route.id}`);
+                if (tag) tag.innerText = currentRoutePrice.toLocaleString();
+            });
+
+            if (state.bookingMode === 'daily') {
+                const overtimeSelect = document.getElementById('select-overtime');
+                state.overtimeHours = parseInt(overtimeSelect.value) || 0;
+                state.totalPrice = 1300000 + (state.overtimeHours * 200000);
+            } else if (state.bookingMode === 'fixed') {
+                if (!state.selectedFixedRouteId) {
+                    state.totalPrice = 0;
+                } else {
+                    const selectedRoute = DATA_ROUTES.find(r => r.id === state.selectedFixedRouteId);
+                    if (selectedRoute) {
+                        if (selectedRoute.maxPax && state.paxCount > selectedRoute.maxPax) {
+                            state.totalPrice = selectedRoute.basePrice * Math.ceil(state.paxCount / selectedRoute.maxPax);
+                        } else if (selectedRoute.tiered && state.paxCount >= selectedRoute.tierThreshold) {
+                            state.totalPrice = selectedRoute.tierPrice;
+                        } else {
+                            state.totalPrice = selectedRoute.basePrice;
+                        }
+                    }
+                }
+            }
+            document.getElementById('total-price-display').innerText = state.totalPrice.toLocaleString();
+        }
+
+        // --- 5. ADMIN CONTROL PANEL LOGIC ---
+        function toggleAdminPanel() {
+            if (isAdminLoggedIn) {
+                isAdminLoggedIn = false;
+                document.getElementById('admin-controls').classList.add('hidden');
+                document.getElementById('btn-admin-login').innerText = "เข้าสู่ระบบ";
+            } else {
+                const pass = prompt("กรุณากรอกรหัสผ่านผู้ดูแลระบบ:");
+                if (pass === ADMIN_PASSWORD) {
+                    isAdminLoggedIn = true;
+                    document.getElementById('admin-controls').classList.remove('hidden');
+                    document.getElementById('btn-admin-login').innerText = "ออกจากระบบ";
+                } else if (pass !== null) {
+                    alert("❌ รหัสผ่านไม่ถูกต้อง!");
+                }
+            }
+        }
+
+        function setDayStatus(isAvailable) {
+            const adminDateInput = document.getElementById('admin-date-picker');
+            const targetDate = adminDateInput.value;
+
+            if (!targetDate) return alert("กรุณาเลือกวันที่ต้องการจัดการก่อนครับ");
+
+            if (!isAvailable) {
+                // บล็อกวัน (ถ้ายังไม่มีในลิสต์)
+                if (!bookedDates.includes(targetDate)) {
+                    bookedDates.push(targetDate);
+                }
+            } else {
+                // ปลดล็อกวัน (ลบออกจากลิสต์)
+                bookedDates = bookedDates.filter(d => d !== targetDate);
+            }
+
+            // บันทึกลงในเครื่อง และอัปเดตหน้าจอ
+            localStorage.setItem('van_booked_dates', JSON.stringify(bookedDates));
+            renderAdminLockedDates();
+            checkDateAvailability();
+            alert("บันทึกสถานะวันเรียบร้อยแล้วครับ!");
+        }
+
+        function renderAdminLockedDates() {
+            const listEl = document.getElementById('locked-dates-list');
+            if (bookedDates.length === 0) {
+                listEl.innerHTML = "<span class='text-slate-500 text-xs'>ไม่มีวันที่ถูกล็อกไว้</span>";
+                return;
+            }
+            // จัดเรียงวันที่
+            bookedDates.sort();
+            listEl.innerHTML = bookedDates.map(d => `
+                <span class="bg-red-900/60 text-red-300 border border-red-700/50 px-2 py-0.5 rounded text-[10px] font-mono">${d}</span>
+            `).join('');
+        }
+
+        // --- 6. WHATSAPP REDIRECT LAYER ---
+        function submitBookingToWhatsApp() {
+            const name = document.getElementById('cust-name').value.trim();
+            const phone = document.getElementById('cust-phone').value.trim();
+            const dict = I18N[currentLang];
+
+            if (!state.travelDate) return alert(dict.alertDateEmpty);
+            if (!checkDateAvailability()) return alert(dict.alertDateFull);
+            if (!name) return alert(dict.alertName);
+            if (!phone) return alert(dict.alertPhone);
+            if (state.bookingMode === 'fixed' && !state.selectedFixedRouteId) return alert(dict.alertRoute);
+
+            if (state.selectedFixedRouteId === 'train_station' && state.paxCount > 6) {
+                alert(dict.alertTrainRule);
+            }
+
+            let detailString = "";
+            if (state.bookingMode === 'daily') {
+                const hasKwangsi = document.getElementById('chk-daily-kwangsi').checked ? "Yes" : "No";
+                const hasTing = document.getElementById('chk-daily-ting').checked ? "Yes" : "No";
+                detailString = `Daily Charter (Kuang Si: ${hasKwangsi} / Pak Ou: ${hasTing}) [OT: ${state.overtimeHours} Hrs]`;
+            } else {
+                const routeObj = DATA_ROUTES.find(r => r.id === state.selectedFixedRouteId);
+                detailString = routeObj ? routeObj.names['en'] : "Fixed Destination";
+            }
+
+            const textPayload = `🇱🇦 *NEW VAN BOOKING ORDER* 🇱🇦\n` +
+                                `----------------------------------------\n` +
+                                `📅 *Travel Date:* ${state.travelDate}\n` + // เพิ่มวันที่ลงในใบงานส่ง WhatsApp
+                                `👤 *Customer:* ${name}\n` +
+                                `📞 *Contact/WA:* ${phone}\n` +
+                                `👥 *Total Passengers:* ${state.paxCount} Pax\n` +
+                                `🚖 *Service Mode:* ${state.bookingMode === 'daily' ? 'เหมาวัน (Daily)' : 'รายสถานที่ (Point-to-Point)'}\n` +
+                                `🗺️ *Route Detail:* ${detailString}\n` +
+                                `----------------------------------------\n` +
+                                `💰 *Total Estimated Price:* ${state.totalPrice.toLocaleString()} LAK\n` +
+                                `----------------------------------------\n` +
+                                `Sent via Booking System Portal. Please reply to confirm.`;
+
+            const finalUrl = `https://wa.me/${2052241201}?text=${encodeURIComponent(textPayload)}`;
+            window.open(finalUrl, '_blank');
+        }
+    </script>
 </body>
 </html>
